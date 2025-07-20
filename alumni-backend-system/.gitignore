@@ -1,0 +1,45 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Editor/IDE-specific
+.vscode/
+.idea/
+*.swp
+
+# Build directories
+dist/
+build/
+coverage/
+
+# Optional npm cache directory
+.npm/
+
+# Optional dotenv debug output
+.env.test.local
+
+# Cloudinary (optional)
+cloudinary.js
+
+# Next.js (if you later integrate)
+.next/
+out/
+
+# Stripe CLI webhook secret (optional)
+.stripe/
