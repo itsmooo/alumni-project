@@ -2703,4 +2703,174 @@ function convertToCSV(data) {
   return [csvHeaders, ...csvRows].join("\n")
 }
 
+// Register as attendee (Alumni, Moderator, Admin)
+router.post("/:id/register", authenticateToken, async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id)
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" })
+    }
+
+    if (event.status !== "published") {
+      return res.status(400).json({ message: "Cannot register for unpublished event" })
+    }
+
+    // Check if registration deadline has passed
+    if (event.registration && event.registration.deadline && new Date() > event.registration.deadline) {
+      return res.status(400).json({ message: "Registration deadline has passed" })
+    }
+
+    // Check if event is full
+    if (event.capacity && event.attendees.filter(a => a.status === "registered").length >= event.capacity) {
+      return res.status(400).json({ message: "Event is full" })
+    }
+
+    // Check if user already registered
+    const existingAttendee = event.attendees.find(
+      (attendee) => attendee.user.toString() === req.user._id.toString() && attendee.status === "registered"
+    )
+    if (existingAttendee) {
+      return res.status(400).json({ message: "Already registered for this event" })
+    }
+
+    // Add attendee
+    event.attendees.push({
+      user: req.user._id,
+      status: "registered",
+      registeredAt: new Date(),
+      paymentStatus: event.registration && event.registration.fee && event.registration.fee.amount > 0 ? "pending" : "paid"
+    })
+
+    await event.save()
+
+    res.json({ message: "Successfully registered for event" })
+  } catch (error) {
+    console.error("Attendee registration error:", error)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+/**
+ * @swagger
+ * /api/events/{eventId}/attendees:
+ *   post:
+ *     summary: Register as an attendee for an event (Alumni only)
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event ID
+ *     responses:
+ *       200:
+ *         description: Successfully registered for event
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Successfully registered for event
+ *       400:
+ *         description: Registration error (deadline passed, event full, already registered)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Already registered for this event
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Only alumni can register for events
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Only alumni can register for events
+ *       404:
+ *         description: Event not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Event not found
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+// Register as attendee (Alumni only)
+router.post("/:eventId/attendees", authenticateToken, async (req, res) => {
+  try {
+    // Only alumni can register
+    if (!req.user || req.user.role !== "alumni") {
+      return res.status(403).json({ message: "Only alumni can register for events" })
+    }
+
+    const event = await Event.findById(req.params.eventId)
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" })
+    }
+
+    if (event.status !== "published") {
+      return res.status(400).json({ message: "Cannot register for unpublished event" })
+    }
+
+    // Check if registration deadline has passed
+    if (event.registration && event.registration.deadline && new Date() > event.registration.deadline) {
+      return res.status(400).json({ message: "Registration deadline has passed" })
+    }
+
+    // Check if event is full
+    if (event.capacity && event.attendees.filter(a => a.status === "registered").length >= event.capacity) {
+      return res.status(400).json({ message: "Event is full" })
+    }
+
+    // Check if user already registered
+    const existingAttendee = event.attendees.find(
+      (attendee) => attendee.user.toString() === req.user._id.toString() && attendee.status === "registered"
+    )
+    if (existingAttendee) {
+      return res.status(400).json({ message: "Already registered for this event" })
+    }
+
+    // Add attendee
+    event.attendees.push({
+      user: req.user._id,
+      status: "registered",
+      registeredAt: new Date(),
+      paymentStatus: event.registration && event.registration.fee && event.registration.fee.amount > 0 ? "pending" : "paid"
+    })
+
+    await event.save()
+
+    res.json({ message: "Successfully registered for event" })
+  } catch (error) {
+    console.error("Attendee registration error:", error)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
 module.exports = router

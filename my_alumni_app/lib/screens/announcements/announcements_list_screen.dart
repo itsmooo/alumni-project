@@ -43,62 +43,62 @@ class _AnnouncementsListScreenState extends State<AnnouncementsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('News & Announcements'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: _showFilterDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.bug_report),
-            onPressed: _testApiConnection,
-          ),
-          IconButton(
-            icon: const Icon(Icons.wifi),
-            onPressed: _testConnection,
-            tooltip: 'Test Backend Connection',
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'check_announcements':
-                  _checkExistingAnnouncements();
-                  break;
-                case 'create_test_data':
-                  _createTestAnnouncements();
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'check_announcements',
-                child: Row(
-                  children: [
-                    Icon(Icons.list),
-                    SizedBox(width: 8),
-                    Text('Check Existing Announcements'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'create_test_data',
-                child: Row(
-                  children: [
-                    Icon(Icons.add),
-                    SizedBox(width: 8),
-                    Text('Create Test Announcements'),
-                  ],
-                ),
-              ),
-            ],
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Icon(Icons.more_vert),
-            ),
-          ),
-        ],
-      ),
+      // appBar: AppBar(
+      //   title: const Text('News & Announcements'),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.filter_list),
+      //       onPressed: _showFilterDialog,
+      //     ),
+      //     IconButton(
+      //       icon: const Icon(Icons.bug_report),
+      //       onPressed: _testApiConnection,
+      //     ),
+      //     IconButton(
+      //       icon: const Icon(Icons.wifi),
+      //       onPressed: _testConnection,
+      //       tooltip: 'Test Backend Connection',
+      //     ),
+      //     PopupMenuButton<String>(
+      //       onSelected: (value) {
+      //         switch (value) {
+      //           case 'check_announcements':
+      //             _checkExistingAnnouncements();
+      //             break;
+      //           case 'create_test_data':
+      //             _createTestAnnouncements();
+      //             break;
+      //         }
+      //       },
+      //       itemBuilder: (context) => [
+      //         const PopupMenuItem(
+      //           value: 'check_announcements',
+      //           child: Row(
+      //             children: [
+      //               Icon(Icons.list),
+      //               SizedBox(width: 8),
+      //               Text('Check Existing Announcements'),
+      //             ],
+      //           ),
+      //         ),
+      //         const PopupMenuItem(
+      //           value: 'create_test_data',
+      //           child: Row(
+      //             children: [
+      //               Icon(Icons.add),
+      //               SizedBox(width: 8),
+      //               Text('Create Test Announcements'),
+      //             ],
+      //           ),
+      //         ),
+      //       ],
+      //       child: const Padding(
+      //         padding: EdgeInsets.all(8.0),
+      //         child: Icon(Icons.more_vert),
+      //       ),
+      //     ),
+      //   ],
+      // ),
       body: Column(
         children: [
           // Search bar

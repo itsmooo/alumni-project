@@ -167,7 +167,7 @@ class Announcement {
         media: media,
         createdAt: createdAt,
         updatedAt: updatedAt,
-      );
+    );
     } catch (e, stackTrace) {
       print('Error parsing Announcement: $e');
       print('Stack trace: $stackTrace');
@@ -316,12 +316,12 @@ class AnnouncementAuthor {
         throw FormatException('Author lastName cannot be empty');
       }
 
-      return AnnouncementAuthor(
+    return AnnouncementAuthor(
         id: id,
         firstName: firstName,
         lastName: lastName,
         role: json['role']?.toString(),
-      );
+    );
     } catch (e, stackTrace) {
       print('Error parsing AnnouncementAuthor: $e');
       print('Stack trace: $stackTrace');
@@ -386,7 +386,7 @@ class AnnouncementEngagement {
         views: views,
         likes: likes,
         comments: comments,
-      );
+    );
     } catch (e, stackTrace) {
       print('Error parsing AnnouncementEngagement: $e');
       print('Stack trace: $stackTrace');
@@ -468,11 +468,11 @@ class AnnouncementLike {
       // Parse and validate createdAt
       final createdAt = _parseDateTime(json['createdAt'], 'createdAt');
 
-      return AnnouncementLike(
+    return AnnouncementLike(
         id: id,
         userId: userId,
         createdAt: createdAt,
-      );
+    );
     } catch (e, stackTrace) {
       print('Error parsing AnnouncementLike: $e');
       print('Stack trace: $stackTrace');
@@ -556,7 +556,7 @@ class AnnouncementComment {
         content: content,
         createdAt: createdAt,
         replies: replies,
-      );
+    );
     } catch (e, stackTrace) {
       print('Error parsing AnnouncementComment: $e');
       print('Stack trace: $stackTrace');
@@ -631,7 +631,7 @@ class AnnouncementCommentReply {
       // Parse and validate createdAt
       final createdAt = _parseDateTime(json['createdAt'], 'createdAt');
 
-      return AnnouncementCommentReply(
+    return AnnouncementCommentReply(
         id: id,
         userId: userInfo['userId']!,
         userName: userInfo['userName']!,
@@ -691,11 +691,11 @@ class AnnouncementMedia {
       final documents = _parseStringList(json['documents']);
       final videos = _parseStringList(json['videos']);
 
-      return AnnouncementMedia(
+    return AnnouncementMedia(
         images: images,
         documents: documents,
         videos: videos,
-      );
+    );
     } catch (e, stackTrace) {
       print('Error parsing AnnouncementMedia: $e');
       print('Stack trace: $stackTrace');

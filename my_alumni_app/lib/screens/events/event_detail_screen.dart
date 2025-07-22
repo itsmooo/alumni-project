@@ -6,6 +6,7 @@ import '../../providers/events_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/string_extensions.dart';
 import '../payments/payment_screen.dart';
+import '../../services/api_service.dart'; // Added import for ApiService
 
 class EventDetailScreen extends StatefulWidget {
   final Event event;
@@ -21,6 +22,14 @@ class EventDetailScreen extends StatefulWidget {
 
 class _EventDetailScreenState extends State<EventDetailScreen> {
   bool _isRegistering = false;
+
+  // Helper to check if the current user is already registered for this event
+  bool _isCurrentUserRegistered() {
+    final user = context.read<AuthProvider>().user;
+    if (user == null) return false;
+    return widget.event.attendees.any((attendee) =>
+        attendee.userId == user.id && attendee.status == 'registered');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -233,6 +242,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   }
 
   Widget _buildRegistrationSection() {
+    final alreadyRegistered = _isCurrentUserRegistered();
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -272,28 +282,40 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _canRegister() ? _handleRegistration : null,
+                onPressed: (!alreadyRegistered && _canRegister())
+                    ? _handleRegistration
+                    : null,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: _getRegistrationButtonColor(),
+                  backgroundColor: alreadyRegistered
+                      ? Colors.grey
+                      : _getRegistrationButtonColor(),
                 ),
-                child: _isRegistering
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : Text(
-                        _getRegistrationButtonText(),
-                        style: const TextStyle(
+                child: alreadyRegistered
+                    ? const Text(
+                        'Already Registered',
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
-                      ),
+                      )
+                    : _isRegistering
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : Text(
+                            _getRegistrationButtonText(),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
               ),
             ),
           ],
@@ -669,47 +691,64 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       return;
     }
 
-    // Free event - proceed with registration
+    // Free event - show confirmation modal
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Attendance'),
+        content: Text(
+          'This event is on '
+          '${DateFormat.yMMMMd().format(widget.event.date.start)} at '
+          '${DateFormat.Hm().format(widget.event.date.start)}.'
+          '\nWill you be able to attend?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Yes, Register Me'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
     setState(() {
       _isRegistering = true;
     });
 
     try {
-      final eventsProvider = context.read<EventsProvider>();
-      final success = await eventsProvider.registerForEvent(widget.event.id);
-
+      await ApiService.registerEventAttendee(widget.event.id);
       if (!mounted) return;
-
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Successfully registered for the event!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(eventsProvider.errorMessage),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Registration failed: $e'),
-          backgroundColor: Colors.red,
+      setState(() {
+        _isRegistering = false;
+      });
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Thank You!'),
+          content:
+              const Text('You are registered. We look forward to seeing you!'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
         ),
       );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isRegistering = false;
-        });
-      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isRegistering = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Registration failed: $e')),
+      );
     }
   }
 

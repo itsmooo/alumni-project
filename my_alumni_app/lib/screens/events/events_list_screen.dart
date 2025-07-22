@@ -45,50 +45,50 @@ class _EventsListScreenState extends State<EventsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Events'),
-        actions: [
-          IconButton(
-            icon: Icon(
-                _showFilters ? Icons.filter_list : Icons.filter_list_outlined),
-            onPressed: () {
-              setState(() {
-                _showFilters = !_showFilters;
-              });
-            },
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'test_connection':
-                  _testApiConnection();
-                  break;
-                case 'check_events':
-                  _checkExistingEvents();
-                  break;
-                case 'create_test_events':
-                  _createTestEvents();
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'test_connection',
-                child: Text('Test API Connection'),
-              ),
-              const PopupMenuItem(
-                value: 'check_events',
-                child: Text('Check Existing Events'),
-              ),
-              const PopupMenuItem(
-                value: 'create_test_events',
-                child: Text('Create Test Events'),
-              ),
-            ],
-            child: const Icon(Icons.more_vert),
-          ),
-        ],
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Events'),
+      //   actions: [
+      //     IconButton(
+      //       icon: Icon(
+      //           _showFilters ? Icons.filter_list : Icons.filter_list_outlined),
+      //       onPressed: () {
+      //         setState(() {
+      //           _showFilters = !_showFilters;
+      //         });
+      //       },
+      //     ),
+      //     PopupMenuButton<String>(
+      //       onSelected: (value) {
+      //         switch (value) {
+      //           case 'test_connection':
+      //             _testApiConnection();
+      //             break;
+      //           case 'check_events':
+      //             _checkExistingEvents();
+      //             break;
+      //           case 'create_test_events':
+      //             _createTestEvents();
+      //             break;
+      //         }
+      //       },
+      //       itemBuilder: (context) => [
+      //         const PopupMenuItem(
+      //           value: 'test_connection',
+      //           child: Text('Test API Connection'),
+      //         ),
+      //         const PopupMenuItem(
+      //           value: 'check_events',
+      //           child: Text('Check Existing Events'),
+      //         ),
+      //         const PopupMenuItem(
+      //           value: 'create_test_events',
+      //           child: Text('Create Test Events'),
+      //         ),
+      //       ],
+      //       child: const Icon(Icons.more_vert),
+      //     ),
+      //   ],
+      // ),
       body: Column(
         children: [
           // Search bar

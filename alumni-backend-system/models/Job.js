@@ -82,6 +82,7 @@ const jobSchema = new mongoose.Schema(
     applicationUrl: String,
     skills: [String],
     tags: [String],
+    questionnaire: [String],
     applications: [
       {
         applicant: {
@@ -100,6 +101,12 @@ const jobSchema = new mongoose.Schema(
         resume: String,
         coverLetter: String,
         notes: String,
+        answers: [
+          {
+            question: String,
+            answer: String,
+          },
+        ],
       },
     ],
     status: {

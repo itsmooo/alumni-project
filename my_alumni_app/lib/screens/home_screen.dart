@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     const AnnouncementsListScreen(),
     const EventsListScreen(),
-    const AlumniListScreen(),
+    // const AlumniListScreen(), // Hide Alumni tab
     const JobsListScreen(),
     const ProfileScreen(),
   ];
@@ -79,8 +79,8 @@ class _HomeScreenState extends State<HomeScreen> {
               BottomNavigationBarItem(
                   icon: Icon(Icons.newspaper), label: 'News'),
               BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Events'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.people), label: 'Alumni'),
+              // BottomNavigationBarItem(
+              //     icon: Icon(Icons.people), label: 'Alumni'), // Hide Alumni tab
               BottomNavigationBarItem(icon: Icon(Icons.work), label: 'Jobs'),
               BottomNavigationBarItem(
                   icon: Icon(Icons.person), label: 'Profile'),

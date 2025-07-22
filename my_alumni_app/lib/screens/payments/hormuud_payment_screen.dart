@@ -11,6 +11,8 @@ class HormuudPaymentScreen extends StatefulWidget {
   final double amount;
   final String currency;
   final String purpose;
+  final String? relatedEntityId;
+  final String? relatedEntityType;
 
   const HormuudPaymentScreen({
     Key? key,
@@ -18,6 +20,8 @@ class HormuudPaymentScreen extends StatefulWidget {
     required this.amount,
     required this.currency,
     required this.purpose,
+    this.relatedEntityId,
+    this.relatedEntityType,
   }) : super(key: key);
 
   @override
@@ -563,20 +567,83 @@ class _HormuudPaymentScreenState extends State<HormuudPaymentScreen> {
 
       if (!mounted) return;
 
-      // Navigate to success screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PaymentSuccessScreen(
-            paymentId: result['paymentId'] ?? widget.paymentId,
-            transactionId: result['requestId'] ?? result['transactionId'],
-            amount: widget.amount,
-            currency: widget.currency,
-            paymentMethod: PaymentMethods.hormuud,
-            isMobileMoney: true,
+      if (result['success'] == true) {
+        // Payment successful, register attendee if event info is present
+        if (widget.relatedEntityType == 'event' && widget.relatedEntityId != null) {
+          try {
+            await ApiService.registerEventAttendee(widget.relatedEntityId!);
+            // Fetch event details for a personalized message
+            String eventName = 'the event';
+            try {
+              final event = await ApiService.getEvent(widget.relatedEntityId!);
+              eventName = event.title.isNotEmpty ? event.title : eventName;
+            } catch (_) {}
+            // Show a warm welcome dialog for paid alumni
+            await showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: const Text('Registration Complete!'),
+                content: Text(
+                  'Thank you for your payment and registration! We are excited to welcome you to "$eventName" and look forward to seeing you there. Safe travels and see you soon! 🎉',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          } catch (e) {
+            // Show error if registration fails
+            await showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: const Text('Registration Failed'),
+                content: Text('Payment succeeded but event registration failed: $e'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            );
+            setState(() { _isProcessing = false; });
+            return;
+          }
+        }
+        // Navigate to success screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaymentSuccessScreen(
+              paymentId: result['paymentId'] ?? widget.paymentId,
+              transactionId: result['requestId'] ?? result['transactionId'],
+              amount: widget.amount,
+              currency: widget.currency,
+              paymentMethod: PaymentMethods.hormuud,
+              isMobileMoney: true,
+            ),
           ),
-        ),
-      );
+        );
+      } else {
+        // Payment not approved
+        await showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Payment Failed'),
+            content: Text(result['message'] ??
+                'Payment was not approved. Please try again.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
     } catch (e) {
       print('Hormuud payment error: $e');
       if (!mounted) return;

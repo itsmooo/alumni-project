@@ -8,6 +8,7 @@ class User {
   final bool isEmailVerified;
   final bool isPhoneVerified;
   final String? profilePicture;
+  final String? photo; // <-- Add this
   final UserProfile? profile;
   final UserPreferences? preferences;
 
@@ -21,11 +22,17 @@ class User {
     required this.isEmailVerified,
     required this.isPhoneVerified,
     this.profilePicture,
+    this.photo,
     this.profile,
     this.preferences,
   });
 
   String get fullName => '$firstName $lastName';
+
+  String? get displayProfilePicture {
+    if (photo != null && photo!.isNotEmpty) return photo;
+    return profilePicture;
+  }
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -38,6 +45,7 @@ class User {
       isEmailVerified: json['isEmailVerified'] ?? false,
       isPhoneVerified: json['isPhoneVerified'] ?? false,
       profilePicture: json['profilePicture'],
+      photo: json['photo'],
       profile: json['profile'] != null
           ? UserProfile.fromJson(json['profile'])
           : null,
@@ -58,6 +66,7 @@ class User {
       'isEmailVerified': isEmailVerified,
       'isPhoneVerified': isPhoneVerified,
       'profilePicture': profilePicture,
+      'photo': photo,
       'profile': profile?.toJson(),
       'preferences': preferences?.toJson(),
     };

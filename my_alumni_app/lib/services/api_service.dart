@@ -6,6 +6,7 @@ import '../models/announcement.dart';
 import '../models/job.dart';
 import '../models/event.dart';
 import '../models/payment.dart';
+import '../models/user.dart'; // Added import for User model
 
 class ApiService {
   // Use the centralized API configuration
@@ -606,6 +607,27 @@ class ApiService {
     }
   }
 
+  // Register authenticated alumni as attendee for an event
+  static Future<void> registerEventAttendee(String eventId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/events/$eventId/attendees'),
+        headers: await _getHeaders(),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw Exception(data['message'] ?? 'Failed to register for event');
+      }
+    } catch (e) {
+      if (e is Exception) {
+        rethrow;
+      }
+      throw Exception('Network error: $e');
+    }
+  }
+
   // =============================================================================
   // PAYMENTS API
   // =============================================================================
@@ -822,6 +844,33 @@ class ApiService {
       print('Result: $result');
     } catch (e) {
       print('❌ Hormuud payment test failed: $e');
+    }
+  }
+
+  // Update user profile (partial update)
+  static Future<User> updateUserProfile(
+      Map<String, dynamic> fieldsToUpdate) async {
+    // If profilePicture is present, also set 'photo' for backend compatibility
+    if (fieldsToUpdate.containsKey('profilePicture')) {
+      fieldsToUpdate['photo'] = fieldsToUpdate['profilePicture'];
+    }
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/users/profile'),
+        headers: await _getHeaders(),
+        body: jsonEncode(fieldsToUpdate),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return User.fromJson(data);
+      } else {
+        throw Exception(data['message'] ?? 'Failed to update profile');
+      }
+    } catch (e) {
+      if (e is Exception) {
+        rethrow;
+      }
+      throw Exception('Network error: $e');
     }
   }
 }

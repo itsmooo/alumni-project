@@ -708,19 +708,26 @@ router.post("/hormuud", authenticateToken, async (req, res) => {
 
     console.log("Hormuud API response:", response.data);
 
+    const hormuudResponse = response.data;
+    const params = hormuudResponse.params || {};
+    const isSuccess =
+      hormuudResponse.responseMsg === 'RCS_SUCCESS' &&
+      params.state === 'APPROVED' &&
+      (hormuudResponse.responseCode === '0' || hormuudResponse.responseCode === '2001');
+
     // Create a payment record in the database
-    const payment = new Payment({
+    const payment = new Payment({ 
       user: req.user._id,
-      type: "test", // You can make this dynamic based on your needs
+      type: "event_ticket", // Use a valid type from the Payment model enum
       purpose: "Hormuud Payment Test",
       amount: amount,
       currency: "USD",
       paymentMethod: "hormuud",
       paymentDetails: {
         phoneNumber: phone,
-        transactionId: response.data.requestId || response.data.transactionId,
+        transactionId: hormuudResponse.requestId || hormuudResponse.transactionId,
       },
-      status: "processing",
+      status: isSuccess ? "processing" : "failed",
       receipt: {
         receiptNumber: `HORMUUD_${Date.now()}`,
         issuedAt: new Date(),
@@ -734,12 +741,20 @@ router.post("/hormuud", authenticateToken, async (req, res) => {
 
     await payment.save();
 
+    if (!isSuccess) {
+      return res.status(400).json({
+        success: false,
+        message: "Payment was not approved",
+        hormuudResponse
+      });
+    }
+
     res.json({
       success: true,
       paymentId: payment._id,
-      requestId: response.data.requestId || response.data.transactionId,
+      requestId: hormuudResponse.requestId || hormuudResponse.transactionId,
       message: "Payment initiated successfully",
-      hormuudResponse: response.data,
+      hormuudResponse,
     });
 
   } catch (error) {

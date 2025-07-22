@@ -43,23 +43,23 @@ class _JobsListScreenState extends State<JobsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Job Opportunities'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: _showFilterDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.bug_report),
-            onPressed: _testApiConnection,
-          ),
-          IconButton(
-            icon: const Icon(Icons.wifi),
-            onPressed: _testConnection,
-          ),
-        ],
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Job Opportunities'),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.filter_list),
+      //       onPressed: _showFilterDialog,
+      //     ),
+      //     IconButton(
+      //       icon: const Icon(Icons.bug_report),
+      //       onPressed: _testApiConnection,
+      //     ),
+      //     IconButton(
+      //       icon: const Icon(Icons.wifi),
+      //       onPressed: _testConnection,
+      //     ),
+      //   ],
+      // ),
       body: Column(
         children: [
           // Search bar

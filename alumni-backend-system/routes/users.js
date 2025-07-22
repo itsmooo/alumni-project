@@ -828,6 +828,12 @@ router.put(
         }
       })
 
+      // If profilePicture is provided, set both user.photo and user.profile.profilePicture
+      if (updates.profilePicture) {
+        user.photo = updates.profilePicture;
+        user.profile.profilePicture = updates.profilePicture;
+      }
+
       await user.save()
 
       res.json({

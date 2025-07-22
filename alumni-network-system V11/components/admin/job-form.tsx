@@ -106,6 +106,7 @@ const jobFormSchema = z.object({
   featured: z.boolean().optional(),
   status: z.enum(["active", "expired", "filled", "paused"]).optional(),
   expiresAt: z.string().optional(),
+  questionnaire: z.array(z.string()).optional(),
 }).refine(
   (data) => {
     // Validate application method requirements
@@ -148,6 +149,8 @@ export function JobForm({ job, isOpen, onClose, onSubmit, isLoading, error }: Jo
   const [benefits, setBenefits] = useState<string[]>([])
   const [currentTag, setCurrentTag] = useState("")
   const [tags, setTags] = useState<string[]>([])
+  const [questionnaire, setQuestionnaire] = useState<string[]>([])
+  const [currentQuestion, setCurrentQuestion] = useState("")
 
   const form = useForm<JobFormData>({
     resolver: zodResolver(jobFormSchema),
@@ -194,6 +197,7 @@ export function JobForm({ job, isOpen, onClose, onSubmit, isLoading, error }: Jo
       featured: false,
       status: "active",
       expiresAt: "",
+      questionnaire: [],
     },
   })
 
@@ -246,12 +250,14 @@ export function JobForm({ job, isOpen, onClose, onSubmit, isLoading, error }: Jo
         featured: job.featured || false,
         status: job.status || "active",
         expiresAt: job.expiresAt ? new Date(job.expiresAt).toISOString().slice(0, 16) : "",
+        questionnaire: job.questionnaire || [],
       })
       setSkills(job.skills || [])
       setRequirements(job.requirements || [])
       setResponsibilities(job.responsibilities || [])
       setBenefits(job.benefits || [])
       setTags(job.tags || [])
+      setQuestionnaire(job.questionnaire || [])
     } else {
       form.reset({
         title: "",
@@ -296,12 +302,14 @@ export function JobForm({ job, isOpen, onClose, onSubmit, isLoading, error }: Jo
         featured: false,
         status: "active",
         expiresAt: "",
+        questionnaire: [],
       })
       setSkills([])
       setRequirements([])
       setResponsibilities([])
       setBenefits([])
       setTags([])
+      setQuestionnaire([])
     }
   }, [job, form])
 
@@ -313,6 +321,7 @@ export function JobForm({ job, isOpen, onClose, onSubmit, isLoading, error }: Jo
       console.log("Responsibilities:", responsibilities)
       console.log("Benefits:", benefits)
       console.log("Tags:", tags)
+      console.log("Questionnaire:", questionnaire)
 
       // Validate required fields that are managed separately
       if (skills.length === 0) {
@@ -345,6 +354,7 @@ export function JobForm({ job, isOpen, onClose, onSubmit, isLoading, error }: Jo
         responsibilities: responsibilities.length > 0 ? responsibilities : undefined,
         benefits: benefits.length > 0 ? benefits : undefined,
         tags: tags.length > 0 ? tags : undefined,
+        questionnaire: questionnaire.length > 0 ? questionnaire : undefined,
         // Format dates properly
         applicationDeadline: data.applicationDeadline ? new Date(data.applicationDeadline).toISOString() : undefined,
         expiresAt: data.expiresAt ? new Date(data.expiresAt).toISOString() : undefined,
@@ -419,6 +429,17 @@ export function JobForm({ job, isOpen, onClose, onSubmit, isLoading, error }: Jo
 
   const removeTag = (tagToRemove: string) => {
     setTags(tags.filter(tag => tag !== tagToRemove))
+  }
+
+  // Questionnaire handlers
+  const addQuestion = () => {
+    if (currentQuestion.trim() && !questionnaire.includes(currentQuestion.trim())) {
+      setQuestionnaire([...questionnaire, currentQuestion.trim()])
+      setCurrentQuestion("")
+    }
+  }
+  const removeQuestion = (questionToRemove: string) => {
+    setQuestionnaire(questionnaire.filter(q => q !== questionToRemove))
   }
 
   const jobTypeOptions = [
@@ -1040,6 +1061,36 @@ export function JobForm({ job, isOpen, onClose, onSubmit, isLoading, error }: Jo
                         </FormItem>
                       )}
                     />
+
+                    {/* --- Questionnaire Section --- */}
+                    <Separator />
+                    <div className="space-y-2">
+                      <Label>Application Questionnaire</Label>
+                      <p className="text-sm text-muted-foreground mb-2">Add questions for applicants to answer when applying for this job.</p>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Add a question..."
+                          value={currentQuestion}
+                          onChange={(e) => setCurrentQuestion(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addQuestion())}
+                          className="bg-white/80 dark:bg-slate-900/60 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-400/30"
+                        />
+                        <Button type="button" onClick={addQuestion} size="sm" className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {questionnaire.map((question, idx) => (
+                          <Badge key={idx} variant="secondary" className="gap-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
+                            {question}
+                            <X className="h-3 w-3 cursor-pointer" onClick={() => removeQuestion(question)} />
+                          </Badge>
+                        ))}
+                      </div>
+                      {questionnaire.length === 0 && (
+                        <p className="text-sm text-muted-foreground">No questions added yet.</p>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>

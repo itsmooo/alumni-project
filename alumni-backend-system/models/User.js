@@ -35,6 +35,10 @@ const userSchema = new mongoose.Schema(
       enum: ["alumni", "admin", "moderator"],
       default: "alumni",
     },
+    photo: {
+      type: String,
+      default: '', // URL to profile photo
+    },
     profile: {
       graduationYear: {
         type: Number,

@@ -247,6 +247,8 @@ router.post(
     body("status").optional().isIn(["active", "filled", "expired", "cancelled"]),
     body("featured").optional().isBoolean(),
     body("expiresAt").optional().isISO8601().withMessage("Expires at must be a valid date"),
+    body("questionnaire").optional().isArray().withMessage("Questionnaire must be an array of questions"),
+    body("questionnaire.*").optional().isString().withMessage("Each questionnaire item must be a string"),
   ],
   async (req, res) => {
     try {
@@ -366,6 +368,8 @@ router.put(
     body("featured").optional().isBoolean(),
     body("applicationDeadline").optional().isISO8601().withMessage("Application deadline must be a valid date"),
     body("expiresAt").optional().isISO8601().withMessage("Expires at must be a valid date"),
+    body("questionnaire").optional().isArray().withMessage("Questionnaire must be an array of questions"),
+    body("questionnaire.*").optional().isString().withMessage("Each questionnaire item must be a string"),
   ],
   async (req, res) => {
     try {
@@ -407,6 +411,8 @@ router.put(
             job.salary = { ...job.salary.toObject(), ...req.body[key] }
           } else if (key === "contactInfo" && typeof req.body[key] === "object") {
             job.contactInfo = { ...job.contactInfo.toObject(), ...req.body[key] }
+          } else if (key === "questionnaire") {
+            job.questionnaire = req.body.questionnaire;
           } else {
             job[key] = req.body[key]
           }
@@ -966,6 +972,129 @@ router.get(
   },
 )
 
+// Apply for a job (with questionnaire)
+/**
+ * @swagger
+ * /api/jobs/{jobId}/apply:
+ *   post:
+ *     summary: Apply for a job (with questionnaire answers)
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Job ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               answers:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     question:
+ *                       type: string
+ *                     answer:
+ *                       type: string
+ *                 description: List of question/answer pairs
+ *           example:
+ *             answers:
+ *               - question: "Why do you want this job?"
+ *                 answer: "I am passionate about software engineering."
+ *               - question: "What excites you about working with us?"
+ *                 answer: "Your company culture and innovative projects."
+ *               - question: "Describe a project or experience relevant to this role."
+ *                 answer: "I built a scalable web app for 10,000 users."
+ *               - question: "What is your strongest skill related to this position?"
+ *                 answer: "Problem-solving and backend development."
+ *               - question: "How would you handle a tight project deadline?"
+ *                 answer: "I would prioritize tasks and communicate clearly with the team."
+ *               - question: "Describe a challenge you overcame in your previous work."
+ *                 answer: "I resolved a major production bug under pressure."
+ *               - question: "When can you start?"
+ *                 answer: "Immediately."
+ *               - question: "Are you willing to relocate or work remotely?"
+ *                 answer: "Yes, I am open to both."
+ *               - question: "What are your salary expectations?"
+ *                 answer: "$5000/month."
+ *               - question: "Is there anything else you’d like us to know?"
+ *                 answer: "I am eager to contribute and grow with your team."
+ *     responses:
+ *       200:
+ *         description: Application submitted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Application submitted successfully
+ *       400:
+ *         description: Already applied or invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Job not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/:jobId/apply', authenticateToken, requireRole(["alumni"]), async (req, res) => {
+  try {
+    const { answers } = req.body;
+    const job = await Job.findById(req.params.jobId);
+    if (!job) return res.status(404).json({ message: "Job not found" });
+
+    // Prevent duplicate applications
+    if (job.applications.some(app => app.applicant && app.applicant.equals(req.user._id))) {
+      return res.status(400).json({ message: "Already applied" });
+    }
+
+    job.applications.push({
+      applicant: req.user._id,
+      answers: answers || [],
+      status: "applied",
+      appliedAt: new Date()
+    });
+
+    await job.save();
+    res.json({ message: "Application submitted successfully" });
+  } catch (error) {
+    console.error("Job application error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // Get job by ID
 router.get("/:id", optionalAuth, async (req, res) => {
   try {
@@ -1015,6 +1144,8 @@ router.post(
     body("applicationMethod")
       .isIn(["email", "website", "phone", "in_person"])
       .withMessage("Invalid application method"),
+    body("questionnaire").optional().isArray().withMessage("Questionnaire must be an array of questions"),
+    body("questionnaire.*").optional().isString().withMessage("Each questionnaire item must be a string"),
   ],
   async (req, res) => {
     try {
@@ -1056,6 +1187,8 @@ router.put(
     body("title").optional().trim().notEmpty().withMessage("Job title cannot be empty"),
     body("company.name").optional().trim().notEmpty().withMessage("Company name cannot be empty"),
     body("description").optional().notEmpty().withMessage("Job description cannot be empty"),
+    body("questionnaire").optional().isArray().withMessage("Questionnaire must be an array of questions"),
+    body("questionnaire.*").optional().isString().withMessage("Each questionnaire item must be a string"),
   ],
   async (req, res) => {
     try {
@@ -1075,8 +1208,17 @@ router.put(
         return res.status(403).json({ message: "Access denied" })
       }
 
+      // Update fields
       Object.keys(req.body).forEach((key) => {
-        if (req.body[key] !== undefined) {
+        if (key === "company") {
+          Object.keys(req.body.company).forEach((companyKey) => {
+            if (req.body.company[companyKey] !== undefined) {
+              job.company[companyKey] = req.body.company[companyKey]
+            }
+          })
+        } else if (key === "questionnaire") {
+          job.questionnaire = req.body.questionnaire;
+        } else if (req.body[key] !== undefined) {
           job[key] = req.body[key]
         }
       })
@@ -1118,60 +1260,6 @@ router.delete("/:id", authenticateToken, async (req, res) => {
     res.status(500).json({ message: "Server error" })
   }
 })
-
-// Apply to job
-router.post(
-  "/:id/apply",
-  authenticateToken,
-  [
-    body("coverLetter").optional().isString().withMessage("Cover letter must be a string"),
-    body("resume").optional().isURL().withMessage("Resume must be a valid URL"),
-  ],
-  async (req, res) => {
-    try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() })
-      }
-
-      const job = await Job.findById(req.params.id)
-
-      if (!job) {
-        return res.status(404).json({ message: "Job not found" })
-      }
-
-      if (job.status !== "active") {
-        return res.status(400).json({ message: "Job is not accepting applications" })
-      }
-
-      // Check if application deadline has passed
-      if (job.applicationDeadline && new Date() > job.applicationDeadline) {
-        return res.status(400).json({ message: "Application deadline has passed" })
-      }
-
-      // Check if user already applied
-      const existingApplication = job.applications.find((app) => app.applicant.toString() === req.user._id.toString())
-
-      if (existingApplication) {
-        return res.status(400).json({ message: "Already applied to this job" })
-      }
-
-      // Add application
-      job.applications.push({
-        applicant: req.user._id,
-        coverLetter: req.body.coverLetter,
-        resume: req.body.resume,
-      })
-
-      await job.save()
-
-      res.json({ message: "Application submitted successfully" })
-    } catch (error) {
-      console.error("Apply to job error:", error)
-      res.status(500).json({ message: "Server error" })
-    }
-  },
-)
 
 // Get job applications (for job poster)
 router.get("/:id/applications", authenticateToken, async (req, res) => {

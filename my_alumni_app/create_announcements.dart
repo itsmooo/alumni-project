@@ -13,3 +13,4 @@ void main() async {
   print('\n=== CHECKING AFTER CREATION ===');
   await TestAnnouncementsCreator.checkExistingAnnouncements();
 }
+ 

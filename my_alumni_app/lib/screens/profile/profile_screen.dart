@@ -7,6 +7,11 @@ import '../../services/api_service.dart';
 import '../../utils/api_test.dart';
 import '../payments/payment_screen.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import '../edit_profile/edit_profile_screen.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:http_parser/http_parser.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -91,89 +96,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _onRefresh() async {
-    try {
-      // Optional: Refresh user data from backend (in case of updates)
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      await authProvider.refreshUser();
-      setState(() {
-        _user = authProvider.user;
-      });
-      _refreshController.refreshCompleted();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile refreshed successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      _refreshController.refreshFailed();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to refresh profile: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
-        final user = authProvider.user ?? _user;
+    final user = context.watch<AuthProvider>().user;
+    return Scaffold(
+      // appBar: AppBar(
+      //   title: const Text('Alumni Network'),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.edit_rounded),
+      //       tooltip: 'Edit Profile',
+      //       onPressed: user == null
+      //           ? null
+      //           : () {
+      //               Navigator.push(
+      //                 context,
+      //                 MaterialPageRoute(
+      //                   builder: (_) => EditProfileScreen(user: user),
+      //                 ),
+      //               );
+      //             },
+      //     ),
+      //   ],
+      // ),
+      backgroundColor: Colors.grey[50],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Profile Header with Gradient
+            _buildProfileHeader(user!),
 
-        if (_isLoading || authProvider.isLoading) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
+            // Information Cards Grid
+            _buildInfoCards(user),
 
-        if (user == null) {
-          return const Scaffold(
-            body: Center(
-              child: Text('No user data available'),
-            ),
-          );
-        }
+            // Logout Button
+            _buildLogoutButton(),
 
-        return SmartRefresher(
-          controller: _refreshController,
-          onRefresh: _onRefresh,
-          child: Scaffold(
-            backgroundColor: Colors.grey[50],
-            body: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Profile Header with Gradient
-                  _buildProfileHeader(user),
+            // Academic Information Section
+            _buildAcademicInformation(user),
 
-                  // Information Cards Grid
-                  _buildInfoCards(user),
+            // Personal Information Section
+            _buildPersonalInformation(user),
 
-                  // Logout Button
-                  _buildLogoutButton(),
-
-                  // Academic Information Section
-                  _buildAcademicInformation(user),
-
-                  // Personal Information Section
-                  _buildPersonalInformation(user),
-
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
     );
   }
 
@@ -208,8 +176,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.edit_rounded, color: Colors.white),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => EditProfileScreen(user: user),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -218,32 +193,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 20),
 
               // Profile Picture
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: user.profilePicture != null
-                    ? ClipOval(
-                        child: Image.network(
-                          user.profilePicture!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(
-                              Icons.person,
-                              size: 60,
-                              color: Colors.white.withOpacity(0.8),
-                            );
-                          },
+              Stack(
+                children: [
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: (user.displayProfilePicture != null && user.displayProfilePicture!.isNotEmpty)
+                        ? ClipOval(
+                            child: Image.network(
+                              user.displayProfilePicture!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  Icons.person,
+                                  size: 60,
+                                  color: Colors.white.withOpacity(0.8),
+                                );
+                              },
+                            ),
+                          )
+                        : (user.profilePicture != null &&
+                                user.profilePicture!.isNotEmpty)
+                            ? ClipOval(
+                                child: Image.network(
+                                  user.profilePicture!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.person,
+                                      size: 60,
+                                      color: Colors.white.withOpacity(0.8),
+                                    );
+                                  },
+                                ),
+                              )
+                            : Icon(
+                                Icons.person,
+                                size: 60,
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                  ),
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () => _pickAndUploadProfilePicture(user),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
                         ),
-                      )
-                    : Icon(
-                        Icons.person,
-                        size: 60,
-                        color: Colors.white.withOpacity(0.8),
+                        padding: const EdgeInsets.all(6),
+                        child: const Icon(Icons.camera_alt,
+                            color: Colors.white, size: 20),
                       ),
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 16),
@@ -432,7 +443,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section Header
           Row(
             children: [
               Icon(Icons.school, color: Colors.green[700], size: 24),
@@ -447,10 +457,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // Academic Info Card
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
@@ -485,6 +492,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   label: 'Graduation Year',
                   value: user.profile?.graduationYear?.toString() ?? 'Not Set',
                 ),
+                const SizedBox(height: 16),
+                _buildInfoRow(
+                  icon: Icons.work,
+                  label: 'Profession',
+                  value: user.profile?.profession ?? 'Not Set',
+                ),
+                const SizedBox(height: 16),
+                _buildInfoRow(
+                  icon: Icons.apartment,
+                  label: 'Company',
+                  value: user.profile?.company ?? 'Not Set',
+                ),
               ],
             ),
           ),
@@ -499,7 +518,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section Header
           Row(
             children: [
               Icon(Icons.person, color: Colors.green[700], size: 24),
@@ -514,10 +532,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // Personal Info Card
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
@@ -534,6 +549,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (user.preferences?.privacy.showEmail ?? true)
                   _buildInfoRow(
@@ -564,22 +580,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   label: 'Verification Status',
                   value: _getVerificationStatus(user),
                 ),
-                if (user.profile?.skills?.isNotEmpty == true)
+                const SizedBox(height: 16),
+                _buildInfoRow(
+                  icon: Icons.info_outline,
+                  label: 'Bio',
+                  value: user.profile?.bio ?? 'Not Set',
+                ),
+                if (user.profile?.skills?.isNotEmpty == true) ...[
                   const SizedBox(height: 16),
-                if (user.profile?.skills?.isNotEmpty == true)
                   _buildInfoRow(
                     icon: Icons.psychology,
                     label: 'Skills',
                     value: user.profile!.skills!.join(', '),
                   ),
-                if (user.profile?.interests?.isNotEmpty == true)
+                ],
+                if (user.profile?.interests?.isNotEmpty == true) ...[
                   const SizedBox(height: 16),
-                if (user.profile?.interests?.isNotEmpty == true)
                   _buildInfoRow(
                     icon: Icons.favorite,
                     label: 'Interests',
                     value: user.profile!.interests!.join(', '),
                   ),
+                ],
+                if (user.profile?.socialLinks != null &&
+                    user.profile!.socialLinks!.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  for (final entry in user.profile!.socialLinks!.entries)
+                    if (entry.value.trim().isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _buildInfoRow(
+                          icon: Icons.link,
+                          label: entry.key,
+                          value: entry.value,
+                        ),
+                      ),
+                ],
+                const SizedBox(height: 16),
+                _buildInfoRow(
+                  icon: Icons.privacy_tip,
+                  label: 'Show Email',
+                  value: (user.preferences?.privacy.showEmail ?? true)
+                      ? 'Yes'
+                      : 'No',
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  icon: Icons.privacy_tip,
+                  label: 'Show Phone',
+                  value: (user.preferences?.privacy.showPhone ?? true)
+                      ? 'Yes'
+                      : 'No',
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  icon: Icons.privacy_tip,
+                  label: 'Show Location',
+                  value: (user.preferences?.privacy.showLocation ?? true)
+                      ? 'Yes'
+                      : 'No',
+                ),
               ],
             ),
           ),
@@ -715,6 +775,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
             content: Text('Logout failed: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
+        );
+      }
+    }
+  }
+
+  Future<void> _pickAndUploadProfilePicture(User user) async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final uri = Uri.parse('http://localhost:5000/api/upload/single');
+      final request = http.MultipartRequest('POST', uri);
+      final token = await ApiService.getToken();
+      request.headers['Authorization'] = 'Bearer $token';
+      final bytes = await picked.readAsBytes();
+      request.files.add(http.MultipartFile.fromBytes(
+        'file',
+        bytes,
+        filename: picked.name,
+        contentType:
+            MediaType('image', picked.mimeType?.split('/').last ?? 'jpeg'),
+      ));
+
+      final response = await request.send();
+      final respStr = await response.stream.bytesToString();
+
+      if (response.statusCode == 200) {
+        final url = jsonDecode(respStr)['url'];
+        await ApiService.updateUserProfile({'profilePicture': url});
+        if (mounted) {
+          context.read<AuthProvider>().refreshUser();
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Profile picture updated!'),
+                backgroundColor: Colors.green),
+          );
+        }
+      } else {
+        throw Exception(jsonDecode(respStr)['message'] ?? 'Upload failed');
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Upload failed: $e'), backgroundColor: Colors.red),
         );
       }
     }

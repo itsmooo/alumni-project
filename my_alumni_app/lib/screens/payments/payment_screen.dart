@@ -464,6 +464,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 amount: widget.amount,
                 currency: widget.currency,
                 purpose: widget.purpose,
+                relatedEntityId: widget.relatedEntityId,
+                relatedEntityType: widget.relatedEntityType,
               ),
             ),
           );

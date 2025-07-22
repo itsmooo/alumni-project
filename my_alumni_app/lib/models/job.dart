@@ -19,6 +19,7 @@ class Job {
   final int applicationCount;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final List<String> questionnaire;
 
   Job({
     required this.id,
@@ -41,6 +42,7 @@ class Job {
     required this.applicationCount,
     required this.createdAt,
     required this.updatedAt,
+    required this.questionnaire,
   });
 
   factory Job.fromJson(Map<String, dynamic> json) {
@@ -66,6 +68,10 @@ class Job {
       applicationCount: json['applicationCount'] ?? 0,
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
+      questionnaire: (json['questionnaire'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
     );
   }
 
@@ -91,6 +97,7 @@ class Job {
       'applicationCount': applicationCount,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'questionnaire': questionnaire,
     };
   }
 
@@ -172,11 +179,11 @@ class Job {
     return 'Location not specified';
   }
 
-    String get salaryDisplay {
+  String get salaryDisplay {
     if (salary.min == null && salary.max == null) {
       return 'Salary not specified';
     }
-    
+
     if (salary.min != null && salary.max != null) {
       return '\$${salary.min!.toStringAsFixed(0)} - \$${salary.max!.toStringAsFixed(0)} ${salary.currency}';
     } else if (salary.min != null) {
