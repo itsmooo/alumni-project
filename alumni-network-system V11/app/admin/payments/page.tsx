@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Pagination } from '@/components/admin/pagination';
 import { AdminSidebar } from '@/components/admin/admin-sidebar';
 import { RouteGuard } from '@/components/auth/route-guard';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { 
   Search, 
@@ -22,7 +23,12 @@ import {
   Calendar,
   User,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  X,
+  Receipt,
+  Clock,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -59,10 +65,178 @@ interface PaymentsResponse {
   };
 }
 
+function PaymentDetailsModal({ payment, isOpen, onClose }: { 
+  payment: Payment | null; 
+  isOpen: boolean; 
+  onClose: () => void; 
+}) {
+  if (!payment) return null;
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle className="w-5 h-5 text-green-600" />;
+      case 'processing':
+        return <Clock className="w-5 h-5 text-yellow-600" />;
+      case 'failed':
+        return <XCircle className="w-5 h-5 text-red-600" />;
+      default:
+        return <Clock className="w-5 h-5 text-gray-600" />;
+    }
+  };
+
+  const getPaymentMethodIcon = (method: string) => {
+    switch (method) {
+      case 'hormuud':
+        return <Phone className="w-5 h-5 text-blue-600" />;
+      case 'zaad':
+        return <Phone className="w-5 h-5 text-green-600" />;
+      case 'card':
+        return <CreditCard className="w-5 h-5 text-purple-600" />;
+      default:
+        return <DollarSign className="w-5 h-5 text-gray-600" />;
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Receipt className="w-5 h-5" />
+            Payment Details
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-6">
+          {/* Payment Status */}
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-3">
+              {getStatusIcon(payment.status)}
+              <div>
+                <h3 className="font-semibold text-lg capitalize">{payment.status}</h3>
+                <p className="text-sm text-gray-600">
+                  {format(new Date(payment.createdAt), 'MMM dd, yyyy HH:mm')}
+                </p>
+              </div>
+            </div>
+            <Badge variant="secondary" className="text-lg px-3 py-1">
+              {payment.currency} {payment.amount.toFixed(2)}
+            </Badge>
+          </div>
+
+          {/* User Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Customer Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Name</label>
+                  <p className="text-lg font-semibold">
+                    {payment.user.firstName} {payment.user.lastName}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Email</label>
+                  <p className="text-lg">{payment.user.email}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Payment Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4" />
+                Payment Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Payment Type</label>
+                  <p className="text-lg capitalize">{payment.type.replace('_', ' ')}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Payment Method</label>
+                  <div className="flex items-center gap-2">
+                    {getPaymentMethodIcon(payment.paymentMethod)}
+                    <span className="text-lg capitalize">{payment.paymentMethod}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-gray-600">Purpose</label>
+                <p className="text-lg">{payment.purpose}</p>
+              </div>
+
+              {payment.paymentDetails?.phoneNumber && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Phone Number</label>
+                  <p className="text-lg">{payment.paymentDetails.phoneNumber}</p>
+                </div>
+              )}
+
+              {payment.paymentDetails?.transactionId && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Transaction ID</label>
+                  <p className="text-lg font-mono bg-gray-100 p-2 rounded">
+                    {payment.paymentDetails.transactionId}
+                  </p>
+                </div>
+              )}
+
+              {payment.receipt?.receiptNumber && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Receipt Number</label>
+                  <p className="text-lg font-mono bg-gray-100 p-2 rounded">
+                    {payment.receipt.receiptNumber}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-4 border-t">
+            <Button 
+              variant="outline" 
+              onClick={onClose}
+              className="flex-1"
+            >
+              Close
+            </Button>
+            <Button 
+              onClick={() => {
+                // Download receipt functionality
+                console.log('Download receipt for:', payment._id);
+              }}
+              disabled={payment.status !== 'completed'}
+              className="flex-1"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download Receipt
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function AdminPaymentsContent() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
@@ -217,6 +391,16 @@ function AdminPaymentsContent() {
     } catch (error) {
       console.error('Error downloading receipt:', error);
     }
+  };
+
+  const openPaymentDetails = (payment: Payment) => {
+    setSelectedPayment(payment);
+    setIsModalOpen(true);
+  };
+
+  const closePaymentDetails = () => {
+    setIsModalOpen(false);
+    setSelectedPayment(null);
   };
 
   if (error) {
@@ -495,6 +679,7 @@ function AdminPaymentsContent() {
                               <Button
                                 variant="ghost"
                                 size="sm"
+                                onClick={() => openPaymentDetails(payment)}
                                 title="View Details"
                               >
                                 <Eye className="w-4 h-4" />
@@ -533,6 +718,13 @@ function AdminPaymentsContent() {
           </div>
         </div>
       </div>
+
+      {/* Payment Details Modal */}
+      <PaymentDetailsModal
+        payment={selectedPayment}
+        isOpen={isModalOpen}
+        onClose={closePaymentDetails}
+      />
     </div>
   );
 }
