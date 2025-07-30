@@ -243,6 +243,7 @@ class _JobsListScreenState extends State<JobsListScreen> {
                       return JobCard(
                         job: job,
                         onTap: () => _navigateToDetail(job),
+                        hasApplied: provider.hasAppliedForJob(job.id),
                       );
                     },
                   ),

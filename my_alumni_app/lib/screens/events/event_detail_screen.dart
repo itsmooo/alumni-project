@@ -5,6 +5,7 @@ import '../../models/event.dart';
 import '../../providers/events_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/string_extensions.dart';
+import '../../constants/app_colors.dart';
 import '../payments/payment_screen.dart';
 import '../../services/api_service.dart'; // Added import for ApiService
 
@@ -34,29 +35,62 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Event Details'),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'Event Details',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.bug_report),
-            onPressed: () {
-              _debugRegistrationStatus();
-            },
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.bug_report_outlined),
+              onPressed: () {
+                _debugRegistrationStatus();
+              },
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () {
-              // TODO: Implement share functionality
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Share functionality coming soon')),
-              );
-            },
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.share_outlined),
+              onPressed: () {
+                // TODO: Implement share functionality
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Row(
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.white, size: 20),
+                        SizedBox(width: 12),
+                        Text('Share functionality coming soon'),
+                      ],
+                    ),
+                    backgroundColor: AppColors.primary,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -101,110 +135,174 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   }
 
   Widget _buildEventHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Type and status badges
-        Row(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: _getTypeColor(widget.event.type),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                widget.event.type.capitalize(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: _getStatusColor(widget.event.status),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                widget.event.status.capitalize(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const Spacer(),
-            if (widget.event.isFull)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Text(
-                  'FULL',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+            // Type and status badges
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _getTypeColor(widget.event.type).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: _getTypeColor(widget.event.type).withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    widget.event.type.capitalize(),
+                    style: TextStyle(
+                      color: _getTypeColor(widget.event.type),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color:
+                        _getStatusColor(widget.event.status).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color:
+                          _getStatusColor(widget.event.status).withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    widget.event.status.capitalize(),
+                    style: TextStyle(
+                      color: _getStatusColor(widget.event.status),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                if (widget.event.isFull)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.error.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      'FULL',
+                      style: TextStyle(
+                        color: AppColors.error,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            // Title
+            Text(
+              widget.event.title,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+                height: 1.3,
               ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Description
+            Text(
+              widget.event.description,
+              style: TextStyle(
+                fontSize: 16,
+                color: AppColors.textSecondary,
+                height: 1.6,
+              ),
+            ),
           ],
         ),
-
-        const SizedBox(height: 16),
-
-        // Title
-        Text(
-          widget.event.title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-
-        const SizedBox(height: 8),
-
-        // Description
-        Text(
-          widget.event.description,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.grey[600],
-                height: 1.5,
-              ),
-        ),
-      ],
+      ),
     );
   }
 
   Widget _buildEventDetails() {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Event Details',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
+                  child: Icon(
+                    Icons.event_outlined,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Event Details',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // Date and time
             _buildDetailRow(
@@ -216,7 +314,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   '${DateFormat('HH:mm').format(widget.event.date.end)}',
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
             // Duration
             _buildDetailRow(
@@ -225,16 +323,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               content: _getDurationText(),
             ),
 
-            const SizedBox(height: 12),
-
-            // Capacity
-            if (widget.event.capacity != null)
+            if (widget.event.capacity != null) ...[
+              const SizedBox(height: 16),
+              // Capacity
               _buildDetailRow(
                 icon: Icons.people,
                 title: 'Capacity',
                 content:
                     '${widget.event.attendeeCount}/${widget.event.capacity} attendees',
               ),
+            ],
           ],
         ),
       ),
@@ -243,19 +341,49 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
   Widget _buildRegistrationSection() {
     final alreadyRegistered = _isCurrentUserRegistered();
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Registration',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
+                  child: Icon(
+                    Icons.how_to_reg_outlined,
+                    color: AppColors.success,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Registration',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // Fee
             _buildDetailRow(
@@ -267,7 +395,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             ),
 
             if (widget.event.registration.deadline != null) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               _buildDetailRow(
                 icon: Icons.event_available,
                 title: 'Registration Deadline',
@@ -276,46 +404,80 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               ),
             ],
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // Registration button
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: (!alreadyRegistered && _canRegister())
-                    ? _handleRegistration
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: alreadyRegistered
-                      ? Colors.grey
-                      : _getRegistrationButtonColor(),
+              child: Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    colors: alreadyRegistered
+                        ? [Colors.grey, Colors.grey.withOpacity(0.8)]
+                        : _canRegister()
+                            ? [
+                                AppColors.primary,
+                                AppColors.primary.withOpacity(0.8)
+                              ]
+                            : [Colors.grey, Colors.grey.withOpacity(0.8)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: (alreadyRegistered
+                              ? Colors.grey
+                              : _canRegister()
+                                  ? AppColors.primary
+                                  : Colors.grey)
+                          .withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
-                child: alreadyRegistered
-                    ? const Text(
-                        'Already Registered',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      )
-                    : _isRegistering
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : Text(
-                            _getRegistrationButtonText(),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
+                child: ElevatedButton(
+                  onPressed: (!alreadyRegistered && _canRegister())
+                      ? _handleRegistration
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: alreadyRegistered
+                      ? const Text(
+                          'Already Registered',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
+                        )
+                      : _isRegistering
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              _getRegistrationButtonText(),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                ),
               ),
             ),
           ],
@@ -325,28 +487,49 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   }
 
   Widget _buildLocationSection() {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
-                  _getLocationIcon(widget.event.location.type),
-                  color: Theme.of(context).primaryColor,
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    _getLocationIcon(widget.event.location.type),
+                    color: AppColors.secondary,
+                    size: 20,
+                  ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Text(
                   'Location',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             if (widget.event.location.type == 'virtual') ...[
               if (widget.event.location.virtualPlatform != null)
                 _buildDetailRow(
@@ -355,7 +538,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   content: widget.event.location.virtualPlatform!,
                 ),
               if (widget.event.location.virtualLink != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 _buildDetailRow(
                   icon: Icons.link,
                   title: 'Meeting Link',
@@ -370,7 +553,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   content: widget.event.location.venue!,
                 ),
               if (widget.event.location.address != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 _buildDetailRow(
                   icon: Icons.map,
                   title: 'Address',
@@ -378,7 +561,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 ),
               ],
               if (widget.event.location.virtualLink != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 _buildDetailRow(
                   icon: Icons.video_call,
                   title: 'Virtual Option',
@@ -393,7 +576,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   content: widget.event.location.venue!,
                 ),
               if (widget.event.location.address != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 _buildDetailRow(
                   icon: Icons.map,
                   title: 'Address',
@@ -402,7 +585,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               ],
             ],
             if (widget.event.location.city != null) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               _buildDetailRow(
                 icon: Icons.location_city,
                 title: 'City',
@@ -417,50 +600,83 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   }
 
   Widget _buildOrganizerSection() {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Organizer',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
+                  child: Icon(
+                    Icons.person_outline,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Organizer',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Row(
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundColor: Theme.of(context).primaryColor,
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
                   child: Text(
                     widget.event.organizer!.firstName[0].toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: AppColors.primary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         widget.event.organizer!.fullName,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Event Organizer',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey[600],
-                            ),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -474,37 +690,72 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   }
 
   Widget _buildTagsSection() {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Tags',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
+                  child: Icon(
+                    Icons.label_outline,
+                    color: AppColors.secondary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Tags',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: widget.event.tags.map((tag) {
                 return Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+                    horizontal: 16,
+                    vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(16),
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.divider,
+                      width: 1,
+                    ),
                   ),
                   child: Text(
                     tag,
                     style: TextStyle(
-                      color: Colors.grey[700],
+                      color: AppColors.textSecondary,
                       fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 );
@@ -517,43 +768,114 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   }
 
   Widget _buildAttendeesSection() {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.people_outline,
+                    color: AppColors.success,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Text(
                   'Attendees',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 const Spacer(),
-                Text(
-                  '${widget.event.attendeeCount} registered',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${widget.event.attendeeCount} registered',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             if (widget.event.attendees.isEmpty)
-              Text(
-                'No attendees yet',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(
+                          Icons.people_outline,
+                          size: 48,
+                          color: AppColors.textSecondary.withOpacity(0.5),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No attendees yet',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Be the first to register!',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary.withOpacity(0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               )
             else
               Text(
                 'Attendee list will be available after registration',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                ),
               ),
           ],
         ),
@@ -569,28 +891,39 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 20,
-          color: Colors.grey[600],
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            size: 20,
+            color: AppColors.textSecondary,
+          ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text(
                 content,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                  height: 1.4,
+                ),
               ),
             ],
           ),
@@ -665,7 +998,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
   Color _getRegistrationButtonColor() {
     if (_canRegister()) {
-      return Theme.of(context).primaryColor;
+      return AppColors.primary;
     }
     return Colors.grey;
   }
@@ -747,7 +1080,20 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         _isRegistering = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration failed: $e')),
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Expanded(child: Text('Registration failed: $e')),
+            ],
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
       );
     }
   }
@@ -755,21 +1101,21 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Color _getTypeColor(String type) {
     switch (type) {
       case 'reunion':
-        return Colors.purple;
+        return AppColors.secondary;
       case 'webinar':
-        return Colors.blue;
+        return AppColors.primary;
       case 'fundraiser':
-        return Colors.red;
+        return AppColors.error;
       case 'networking':
-        return Colors.green;
+        return AppColors.success;
       case 'workshop':
-        return Colors.orange;
+        return AppColors.warning;
       case 'social':
         return Colors.pink;
       case 'other':
-        return Colors.grey;
+        return AppColors.textSecondary;
       default:
-        return Colors.grey;
+        return AppColors.primary;
     }
   }
 
@@ -799,7 +1145,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             'Open: ${widget.event.isRegistrationOpen}\n'
             'Can Register: ${_canRegister()}'),
         duration: const Duration(seconds: 5),
-        backgroundColor: Colors.blue,
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
     );
   }
@@ -807,15 +1157,15 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'draft':
-        return Colors.grey;
+        return AppColors.textSecondary;
       case 'published':
-        return Colors.green;
+        return AppColors.success;
       case 'cancelled':
-        return Colors.red;
+        return AppColors.error;
       case 'completed':
-        return Colors.blue;
+        return AppColors.primary;
       default:
-        return Colors.grey;
+        return AppColors.textSecondary;
     }
   }
 

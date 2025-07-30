@@ -241,6 +241,28 @@ class AnnouncementsProvider extends ChangeNotifier {
     loadAnnouncements(refresh: true);
   }
 
+  // Clear individual filters
+  void clearCategoryFilter() {
+    _selectedCategory = null;
+    loadAnnouncements(refresh: true);
+  }
+
+  void clearPriorityFilter() {
+    _selectedPriority = null;
+    loadAnnouncements(refresh: true);
+  }
+
+  void clearSearchQuery() {
+    _searchQuery = null;
+    loadAnnouncements(refresh: true);
+  }
+
+  // Set search query
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    loadAnnouncements(refresh: true);
+  }
+
   // Clear selected announcement
   void clearSelectedAnnouncement() {
     _selectedAnnouncement = null;

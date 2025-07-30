@@ -5,8 +5,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../providers/announcements_provider.dart';
 import '../../models/announcement.dart';
 import '../../services/api_service.dart';
-import '../../utils/api_test.dart';
-import '../../utils/create_test_announcements.dart';
+import '../../constants/app_colors.dart';
 import 'announcement_card.dart';
 import 'announcement_detail_screen.dart';
 
@@ -19,8 +18,9 @@ class AnnouncementsListScreen extends StatefulWidget {
 }
 
 class _AnnouncementsListScreenState extends State<AnnouncementsListScreen> {
-  final RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  final RefreshController _refreshController = RefreshController(
+    initialRefresh: false,
+  );
   final TextEditingController _searchController = TextEditingController();
   String? _selectedCategory;
   String? _selectedPriority;
@@ -43,86 +43,128 @@ class _AnnouncementsListScreenState extends State<AnnouncementsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('News & Announcements'),
-      //   actions: [
-      //     IconButton(
-      //       icon: const Icon(Icons.filter_list),
-      //       onPressed: _showFilterDialog,
-      //     ),
-      //     IconButton(
-      //       icon: const Icon(Icons.bug_report),
-      //       onPressed: _testApiConnection,
-      //     ),
-      //     IconButton(
-      //       icon: const Icon(Icons.wifi),
-      //       onPressed: _testConnection,
-      //       tooltip: 'Test Backend Connection',
-      //     ),
-      //     PopupMenuButton<String>(
-      //       onSelected: (value) {
-      //         switch (value) {
-      //           case 'check_announcements':
-      //             _checkExistingAnnouncements();
-      //             break;
-      //           case 'create_test_data':
-      //             _createTestAnnouncements();
-      //             break;
-      //         }
-      //       },
-      //       itemBuilder: (context) => [
-      //         const PopupMenuItem(
-      //           value: 'check_announcements',
-      //           child: Row(
-      //             children: [
-      //               Icon(Icons.list),
-      //               SizedBox(width: 8),
-      //               Text('Check Existing Announcements'),
-      //             ],
-      //           ),
-      //         ),
-      //         const PopupMenuItem(
-      //           value: 'create_test_data',
-      //           child: Row(
-      //             children: [
-      //               Icon(Icons.add),
-      //               SizedBox(width: 8),
-      //               Text('Create Test Announcements'),
-      //             ],
-      //           ),
-      //         ),
-      //       ],
-      //       child: const Padding(
-      //         padding: EdgeInsets.all(8.0),
-      //         child: Icon(Icons.more_vert),
-      //       ),
-      //     ),
-      //   ],
-      // ),
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search announcements...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _performSearch();
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+          // Header Section
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
               ),
-              onSubmitted: (_) => _performSearch(),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.announcement_outlined,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'News & Announcements',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'Stay updated with the latest news',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Search bar
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search announcements...',
+                      hintStyle: TextStyle(
+                        color: AppColors.textSecondary.withOpacity(0.6),
+                      ),
+                      prefixIcon: Container(
+                        margin: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.search_outlined,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                      ),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? Container(
+                              margin: const EdgeInsets.all(12),
+                              child: IconButton(
+                                icon: Icon(
+                                  Icons.clear,
+                                  color: AppColors.textSecondary,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  _performSearch();
+                                },
+                              ),
+                            )
+                          : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                    ),
+                    onSubmitted: (_) => _performSearch(),
+                    onChanged: (_) => _performSearch(),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -136,28 +178,28 @@ class _AnnouncementsListScreenState extends State<AnnouncementsListScreen> {
               }
 
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20.0,
+                  vertical: 16,
+                ),
                 child: Wrap(
                   spacing: 8.0,
                   children: [
                     if (provider.selectedCategory != null)
-                      _buildFilterChip('Category: ${provider.selectedCategory}',
-                          () {
-                        provider.setFilters(category: null);
-                      }),
+                      _buildFilterChip(
+                        'Category: ${provider.selectedCategory!}',
+                        () => provider.clearCategoryFilter(),
+                      ),
                     if (provider.selectedPriority != null)
-                      _buildFilterChip('Priority: ${provider.selectedPriority}',
-                          () {
-                        provider.setFilters(priority: null);
-                      }),
+                      _buildFilterChip(
+                        'Priority: ${provider.selectedPriority!}',
+                        () => provider.clearPriorityFilter(),
+                      ),
                     if (provider.searchQuery != null)
-                      _buildFilterChip('Search: ${provider.searchQuery}', () {
-                        provider.setFilters(search: null);
-                      }),
-                    _buildFilterChip('Clear All', () {
-                      provider.clearFilters();
-                      _searchController.clear();
-                    }),
+                      _buildFilterChip(
+                        'Search: ${provider.searchQuery!}',
+                        () => provider.clearSearchQuery(),
+                      ),
                   ],
                 ),
               );
@@ -169,8 +211,33 @@ class _AnnouncementsListScreenState extends State<AnnouncementsListScreen> {
             child: Consumer<AnnouncementsProvider>(
               builder: (context, provider, child) {
                 if (provider.isLoading && provider.announcements.isEmpty) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Loading announcements...',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 }
 
@@ -179,34 +246,52 @@ class _AnnouncementsListScreenState extends State<AnnouncementsListScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: Colors.grey[400],
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: AppColors.error,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Failed to load announcements',
                           style: TextStyle(
                             fontSize: 18,
-                            color: Colors.grey[600],
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           provider.error!,
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                          ),
+                          style: TextStyle(color: AppColors.textSecondary),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
-                        ElevatedButton(
+                        ElevatedButton.icon(
                           onPressed: () {
                             provider.clearError();
                             provider.loadAnnouncements(refresh: true);
                           },
-                          child: const Text('Retry'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: Icon(Icons.refresh),
+                          label: Text('Retry'),
                         ),
                       ],
                     ),
@@ -218,41 +303,70 @@ class _AnnouncementsListScreenState extends State<AnnouncementsListScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.announcement_outlined,
-                          size: 64,
-                          color: Colors.grey[400],
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Icon(
+                            Icons.announcement_outlined,
+                            size: 48,
+                            color: AppColors.primary,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'No announcements found',
                           style: TextStyle(
                             fontSize: 18,
-                            color: Colors.grey[600],
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Check back later for updates',
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                          ),
+                          style: TextStyle(color: AppColors.textSecondary),
                         ),
                         const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            final provider =
-                                context.read<AnnouncementsProvider>();
-                            provider.loadAnnouncements(refresh: true);
-                          },
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Refresh'),
-                        ),
-                        const SizedBox(height: 8),
-                        TextButton.icon(
-                          onPressed: _testConnection,
-                          icon: const Icon(Icons.wifi),
-                          label: const Text('Test Connection'),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                final provider =
+                                    context.read<AnnouncementsProvider>();
+                                provider.loadAnnouncements(refresh: true);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              icon: Icon(Icons.refresh),
+                              label: Text('Refresh'),
+                            ),
+                            const SizedBox(width: 12),
+                            TextButton.icon(
+                              onPressed: _testConnection,
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.primary,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
+                              ),
+                              icon: Icon(Icons.wifi),
+                              label: Text('Test Connection'),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -261,28 +375,38 @@ class _AnnouncementsListScreenState extends State<AnnouncementsListScreen> {
 
                 return SmartRefresher(
                   controller: _refreshController,
-                  onRefresh: _onRefresh,
-                  onLoading: _onLoading,
-                  enablePullUp: provider.hasMore,
+                  enablePullDown: true,
+                  enablePullUp: true,
+                  header: const WaterDropHeader(),
+                  footer: const ClassicFooter(),
+                  onRefresh: () async {
+                    await provider.loadAnnouncements(refresh: true);
+                    _refreshController.refreshCompleted();
+                  },
+                  onLoading: () async {
+                    await provider.loadAnnouncements(refresh: false);
+                    _refreshController.loadComplete();
+                  },
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(16.0),
-                    itemCount: provider.announcements.length +
-                        (provider.hasMore ? 1 : 0),
+                    padding: const EdgeInsets.all(20),
+                    itemCount: provider.announcements.length,
                     itemBuilder: (context, index) {
-                      if (index == provider.announcements.length) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      }
-
                       final announcement = provider.announcements[index];
                       return AnnouncementCard(
                         announcement: announcement,
-                        onTap: () => _navigateToDetail(announcement),
-                        onLike: () => provider.toggleLike(announcement.id),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AnnouncementDetailScreen(
+                                announcement: announcement,
+                              ),
+                            ),
+                          );
+                        },
+                        onLike: () {
+                          // Handle like functionality
+                        },
                       );
                     },
                   ),
@@ -295,259 +419,84 @@ class _AnnouncementsListScreenState extends State<AnnouncementsListScreen> {
     );
   }
 
-  Widget _buildFilterChip(String label, VoidCallback onDeleted) {
-    return Chip(
-      label: Text(label),
-      deleteIcon: const Icon(Icons.close, size: 18),
-      onDeleted: onDeleted,
-      backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+  Widget _buildFilterChip(String label, VoidCallback onRemove) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 1),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onRemove,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(Icons.close, size: 16, color: AppColors.primary),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   void _performSearch() {
     final provider = context.read<AnnouncementsProvider>();
-    provider.setFilters(search: _searchController.text.trim());
+    provider.setSearchQuery(_searchController.text.trim());
   }
 
-  void _showFilterDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Filter Announcements'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Category filter
-            DropdownButtonFormField<String>(
-              value: _selectedCategory,
-              decoration: const InputDecoration(
-                labelText: 'Category',
-                border: OutlineInputBorder(),
-              ),
-              items: [
-                const DropdownMenuItem(
-                    value: null, child: Text('All Categories')),
-                const DropdownMenuItem(
-                    value: 'general', child: Text('General')),
-                const DropdownMenuItem(value: 'jobs', child: Text('Jobs')),
-                const DropdownMenuItem(value: 'news', child: Text('News')),
-                const DropdownMenuItem(
-                    value: 'scholarships', child: Text('Scholarships')),
-                const DropdownMenuItem(value: 'events', child: Text('Events')),
-                const DropdownMenuItem(
-                    value: 'achievements', child: Text('Achievements')),
-                const DropdownMenuItem(
-                    value: 'obituary', child: Text('Obituary')),
+  void _testConnection() async {
+    try {
+      final isConnected = await ApiService.testConnection();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white, size: 20),
+                const SizedBox(width: 12),
+                const Text('Connection successful'),
               ],
-              onChanged: (value) {
-                setState(() {
-                  _selectedCategory = value;
-                });
-              },
             ),
-            const SizedBox(height: 16),
-
-            // Priority filter
-            DropdownButtonFormField<String>(
-              value: _selectedPriority,
-              decoration: const InputDecoration(
-                labelText: 'Priority',
-                border: OutlineInputBorder(),
-              ),
-              items: [
-                const DropdownMenuItem(
-                    value: null, child: Text('All Priorities')),
-                const DropdownMenuItem(value: 'low', child: Text('Low')),
-                const DropdownMenuItem(value: 'medium', child: Text('Medium')),
-                const DropdownMenuItem(value: 'high', child: Text('High')),
-                const DropdownMenuItem(value: 'urgent', child: Text('Urgent')),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 12),
+                Expanded(child: Text('Connection failed: ${e.toString()}')),
               ],
-              onChanged: (value) {
-                setState(() {
-                  _selectedPriority = value;
-                });
-              },
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedCategory = null;
-                _selectedPriority = null;
-              });
-            },
-            child: const Text('Clear'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final provider = context.read<AnnouncementsProvider>();
-              provider.setFilters(
-                category: _selectedCategory,
-                priority: _selectedPriority,
-              );
-              Navigator.pop(context);
-            },
-            child: const Text('Apply'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _navigateToDetail(Announcement announcement) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            AnnouncementDetailScreen(announcement: announcement),
-      ),
-    );
-  }
-
-  Future<void> _onRefresh() async {
-    final provider = context.read<AnnouncementsProvider>();
-    await provider.loadAnnouncements(refresh: true);
-    _refreshController.refreshCompleted();
-  }
-
-  Future<void> _onLoading() async {
-    final provider = context.read<AnnouncementsProvider>();
-    await provider.loadAnnouncements();
-    _refreshController.loadComplete();
-  }
-
-  Future<void> _testApiConnection() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Testing API connection...')),
-    );
-
-    try {
-      await ApiTest.testAnnouncementsEndpoints();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('API test completed! Check console for details.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('API test failed: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _checkExistingAnnouncements() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Checking existing announcements...')),
-    );
-
-    try {
-      await TestAnnouncementsCreator.checkExistingAnnouncements();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Check completed! Check console for details.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Check failed: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _createTestAnnouncements() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Creating test announcements...')),
-    );
-
-    try {
-      await TestAnnouncementsCreator.createTestAnnouncements();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content:
-                Text('Test announcements created! Check console for details.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        // Refresh the announcements list
-        final provider = context.read<AnnouncementsProvider>();
-        await provider.loadAnnouncements(refresh: true);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text('Failed to create test announcements: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _testConnection() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Testing connection to backend...')),
-    );
-
-    try {
-      final isConnected = await ApiService.testBackendConnection();
-
-      if (mounted) {
-        if (isConnected) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Backend connection successful!'),
-              backgroundColor: Colors.green,
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
-          );
-
-          // Refresh announcements after successful connection test
-          final provider = context.read<AnnouncementsProvider>();
-          await provider.loadAnnouncements(refresh: true);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                  '❌ Backend connection failed! Check if server is running.'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Connection test failed: ${e.toString()}'),
-            backgroundColor: Colors.red,
           ),
         );
       }

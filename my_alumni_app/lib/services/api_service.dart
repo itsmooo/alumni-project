@@ -873,4 +873,45 @@ class ApiService {
       throw Exception('Network error: $e');
     }
   }
+
+  // Check if user has applied for a job
+  static Future<bool> hasAppliedForJob(String jobId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/jobs/$jobId/application-status'),
+        headers: await _getHeaders(),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return data['hasApplied'] ?? false;
+      } else if (response.statusCode == 404) {
+        // User hasn't applied yet
+        return false;
+      } else {
+        throw Exception(
+            data['message'] ?? 'Failed to check application status');
+      }
+    } catch (e) {
+      if (e is Exception) {
+        rethrow;
+      }
+      throw Exception('Network error: $e');
+    }
+  }
+
+  // Test connection to the API
+  static Future<bool> testConnection() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/health'),
+        headers: await _getHeaders(),
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
 }

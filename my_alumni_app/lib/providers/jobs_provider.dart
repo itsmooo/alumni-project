@@ -37,6 +37,34 @@ class JobsProvider extends ChangeNotifier {
   // Get remote jobs
   List<Job> get remoteJobs => _jobs.where((job) => job.isRemote).toList();
 
+  // Application status tracking
+  final Map<String, bool> _applicationStatus = {};
+
+  // Check if user has applied for a specific job
+  bool hasAppliedForJob(String jobId) {
+    return _applicationStatus[jobId] ?? false;
+  }
+
+  // Set application status for a job
+  void setApplicationStatus(String jobId, bool hasApplied) {
+    _applicationStatus[jobId] = hasApplied;
+    notifyListeners();
+  }
+
+  // Check application status for all jobs
+  Future<void> checkApplicationStatusForAllJobs() async {
+    for (final job in _jobs) {
+      try {
+        final hasApplied = await ApiService.hasAppliedForJob(job.id);
+        _applicationStatus[job.id] = hasApplied;
+      } catch (e) {
+        print('Error checking application status for job ${job.id}: $e');
+        _applicationStatus[job.id] = false;
+      }
+    }
+    notifyListeners();
+  }
+
   // Load jobs
   Future<void> loadJobs({bool refresh = false}) async {
     if (_isLoading) return;
@@ -97,6 +125,9 @@ class JobsProvider extends ChangeNotifier {
 
       print('Total jobs in list: ${_jobs.length}');
       print('Has more: $_hasMore');
+
+      // Check application status for all jobs
+      await checkApplicationStatusForAllJobs();
 
       notifyListeners();
     } catch (e) {

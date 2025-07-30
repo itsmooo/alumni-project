@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../providers/events_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/string_extensions.dart';
+import '../../constants/app_colors.dart';
 import 'event_card.dart';
 import 'event_detail_screen.dart';
 
@@ -45,76 +46,150 @@ class _EventsListScreenState extends State<EventsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Events'),
-      //   actions: [
-      //     IconButton(
-      //       icon: Icon(
-      //           _showFilters ? Icons.filter_list : Icons.filter_list_outlined),
-      //       onPressed: () {
-      //         setState(() {
-      //           _showFilters = !_showFilters;
-      //         });
-      //       },
-      //     ),
-      //     PopupMenuButton<String>(
-      //       onSelected: (value) {
-      //         switch (value) {
-      //           case 'test_connection':
-      //             _testApiConnection();
-      //             break;
-      //           case 'check_events':
-      //             _checkExistingEvents();
-      //             break;
-      //           case 'create_test_events':
-      //             _createTestEvents();
-      //             break;
-      //         }
-      //       },
-      //       itemBuilder: (context) => [
-      //         const PopupMenuItem(
-      //           value: 'test_connection',
-      //           child: Text('Test API Connection'),
-      //         ),
-      //         const PopupMenuItem(
-      //           value: 'check_events',
-      //           child: Text('Check Existing Events'),
-      //         ),
-      //         const PopupMenuItem(
-      //           value: 'create_test_events',
-      //           child: Text('Create Test Events'),
-      //         ),
-      //       ],
-      //       child: const Icon(Icons.more_vert),
-      //     ),
-      //   ],
-      // ),
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search events...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          context.read<EventsProvider>().setFilters(search: '');
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+          // Header Section
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
               ),
-              onChanged: (value) {
-                context.read<EventsProvider>().setFilters(search: value);
-              },
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.event_outlined,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Events & Activities',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'Discover upcoming events',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          _showFilters
+                              ? Icons.filter_list
+                              : Icons.filter_list_outlined,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _showFilters = !_showFilters;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Search bar
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search events...',
+                      hintStyle: TextStyle(
+                        color: AppColors.textSecondary.withOpacity(0.6),
+                      ),
+                      prefixIcon: Container(
+                        margin: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.search_outlined,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                      ),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? Container(
+                              margin: const EdgeInsets.all(12),
+                              child: IconButton(
+                                icon: Icon(
+                                  Icons.clear,
+                                  color: AppColors.textSecondary,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  context
+                                      .read<EventsProvider>()
+                                      .setFilters(search: '');
+                                },
+                              ),
+                            )
+                          : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                    ),
+                    onChanged: (value) {
+                      context.read<EventsProvider>().setFilters(search: value);
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -126,8 +201,33 @@ class _EventsListScreenState extends State<EventsListScreen> {
             child: Consumer<EventsProvider>(
               builder: (context, eventsProvider, child) {
                 if (eventsProvider.isLoading && eventsProvider.events.isEmpty) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Loading events...',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 }
 
@@ -136,29 +236,54 @@ class _EventsListScreenState extends State<EventsListScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: Colors.red,
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: AppColors.error,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Error loading events',
-                          style: Theme.of(context).textTheme.headlineSmall,
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           eventsProvider.errorMessage,
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                          ),
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         const SizedBox(height: 16),
-                        ElevatedButton(
+                        ElevatedButton.icon(
                           onPressed: () {
                             eventsProvider.clearError();
                             eventsProvider.loadEvents(refresh: true);
                           },
-                          child: const Text('Retry'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: Icon(Icons.refresh),
+                          label: Text('Retry'),
                         ),
                       ],
                     ),
@@ -170,27 +295,52 @@ class _EventsListScreenState extends State<EventsListScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
-                          Icons.event_busy,
-                          size: 64,
-                          color: Colors.grey,
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Icon(
+                            Icons.event_busy,
+                            size: 48,
+                            color: AppColors.primary,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'No events found',
-                          style: Theme.of(context).textTheme.headlineSmall,
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Try adjusting your filters or search terms',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                         const SizedBox(height: 16),
-                        ElevatedButton(
+                        ElevatedButton.icon(
                           onPressed: () {
                             eventsProvider.clearFilters();
                           },
-                          child: const Text('Clear Filters'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: Icon(Icons.clear),
+                          label: Text('Clear Filters'),
                         ),
                       ],
                     ),
@@ -203,47 +353,51 @@ class _EventsListScreenState extends State<EventsListScreen> {
                   },
                   child: ListView.builder(
                     controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(20),
                     itemCount: eventsProvider.events.length + 1,
                     itemBuilder: (context, index) {
                       if (index == eventsProvider.events.length) {
                         if (eventsProvider.isLoading) {
-                          return const Center(
+                          return Center(
                             child: Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: CircularProgressIndicator(),
+                              padding: const EdgeInsets.all(16.0),
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.primary,
+                                ),
+                              ),
                             ),
                           );
                         }
                         if (eventsProvider.hasMoreData) {
                           return const SizedBox.shrink();
                         }
-                        return const Padding(
-                          padding: EdgeInsets.all(16.0),
+                        return Padding(
+                          padding: const EdgeInsets.all(16.0),
                           child: Center(
                             child: Text(
                               'No more events to load',
-                              style: TextStyle(color: Colors.grey),
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         );
                       }
 
                       final event = eventsProvider.events[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        child: EventCard(
-                          event: event,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    EventDetailScreen(event: event),
-                              ),
-                            );
-                          },
-                        ),
+                      return EventCard(
+                        event: event,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  EventDetailScreen(event: event),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
@@ -260,15 +414,19 @@ class _EventsListScreenState extends State<EventsListScreen> {
     return Consumer<EventsProvider>(
       builder: (context, eventsProvider, child) {
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            border: Border(
-              bottom: BorderSide(
-                color: Theme.of(context).dividerColor,
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-            ),
+            ],
           ),
+          margin: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -277,33 +435,61 @@ class _EventsListScreenState extends State<EventsListScreen> {
                 children: [
                   Text(
                     'Filters',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                   TextButton(
                     onPressed: () {
                       eventsProvider.clearFilters();
                     },
-                    child: const Text('Clear All'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                    ),
+                    child: Text(
+                      'Clear All',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Event Type Filter
               Text(
                 'Event Type',
-                style: Theme.of(context).textTheme.labelMedium,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 children: [
                   FilterChip(
-                    label: const Text('All'),
+                    label: Text('All'),
                     selected: eventsProvider.selectedType == null,
                     onSelected: (selected) {
                       eventsProvider.setFilters(type: null);
                     },
+                    selectedColor: AppColors.primary.withOpacity(0.2),
+                    checkmarkColor: AppColors.primary,
+                    labelStyle: TextStyle(
+                      color: eventsProvider.selectedType == null
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   ...EventsProvider.eventTypes.map((type) {
                     return FilterChip(
@@ -312,28 +498,48 @@ class _EventsListScreenState extends State<EventsListScreen> {
                       onSelected: (selected) {
                         eventsProvider.setFilters(type: selected ? type : null);
                       },
+                      selectedColor: AppColors.primary.withOpacity(0.2),
+                      checkmarkColor: AppColors.primary,
+                      labelStyle: TextStyle(
+                        color: eventsProvider.selectedType == type
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     );
                   }).toList(),
                 ],
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Status Filter
               Text(
                 'Status',
-                style: Theme.of(context).textTheme.labelMedium,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 children: [
                   FilterChip(
-                    label: const Text('All'),
+                    label: Text('All'),
                     selected: eventsProvider.selectedStatus == null,
                     onSelected: (selected) {
                       eventsProvider.setFilters(status: null);
                     },
+                    selectedColor: AppColors.primary.withOpacity(0.2),
+                    checkmarkColor: AppColors.primary,
+                    labelStyle: TextStyle(
+                      color: eventsProvider.selectedStatus == null
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   ...EventsProvider.eventStatuses.map((status) {
                     return FilterChip(
@@ -343,12 +549,20 @@ class _EventsListScreenState extends State<EventsListScreen> {
                         eventsProvider.setFilters(
                             status: selected ? status : null);
                       },
+                      selectedColor: AppColors.primary.withOpacity(0.2),
+                      checkmarkColor: AppColors.primary,
+                      labelStyle: TextStyle(
+                        color: eventsProvider.selectedStatus == status
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     );
                   }).toList(),
                 ],
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Upcoming Only Filter
               Row(
@@ -358,8 +572,16 @@ class _EventsListScreenState extends State<EventsListScreen> {
                     onChanged: (value) {
                       eventsProvider.setFilters(upcoming: value);
                     },
+                    activeColor: AppColors.primary,
                   ),
-                  const Text('Upcoming events only'),
+                  Text(
+                    'Upcoming events only',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -379,9 +601,20 @@ class _EventsListScreenState extends State<EventsListScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-              'API connection test completed. Found ${eventsProvider.events.length} events.'),
-          backgroundColor: Colors.green,
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Text(
+                'API connection test completed. Found ${eventsProvider.events.length} events.',
+              ),
+            ],
+          ),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
     } catch (e) {
@@ -389,8 +622,18 @@ class _EventsListScreenState extends State<EventsListScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('API connection failed: $e'),
-          backgroundColor: Colors.red,
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Expanded(child: Text('API connection failed: $e')),
+            ],
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
     }
@@ -410,9 +653,26 @@ class _EventsListScreenState extends State<EventsListScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(message),
-          backgroundColor:
-              eventsProvider.events.isEmpty ? Colors.orange : Colors.green,
+          content: Row(
+            children: [
+              Icon(
+                eventsProvider.events.isEmpty
+                    ? Icons.info_outline
+                    : Icons.check_circle,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Text(message),
+            ],
+          ),
+          backgroundColor: eventsProvider.events.isEmpty
+              ? AppColors.warning
+              : AppColors.success,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
     } catch (e) {
@@ -420,8 +680,18 @@ class _EventsListScreenState extends State<EventsListScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error checking events: $e'),
-          backgroundColor: Colors.red,
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Expanded(child: Text('Error checking events: $e')),
+            ],
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
     }
@@ -436,10 +706,21 @@ class _EventsListScreenState extends State<EventsListScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Test events creation not implemented yet. Please create events through the admin panel.'),
-          backgroundColor: Colors.orange,
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Text(
+                'Test events creation not implemented yet. Please create events through the admin panel.',
+              ),
+            ],
+          ),
+          backgroundColor: AppColors.warning,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
     } catch (e) {
@@ -447,8 +728,18 @@ class _EventsListScreenState extends State<EventsListScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error creating test events: $e'),
-          backgroundColor: Colors.red,
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Expanded(child: Text('Error creating test events: $e')),
+            ],
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
     }

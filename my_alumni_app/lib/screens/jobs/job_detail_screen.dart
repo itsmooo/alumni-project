@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../models/job.dart';
+import '../../providers/jobs_provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../services/api_service.dart';
@@ -28,13 +30,19 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   Future<void> _checkIfApplied() async {
-    // TODO: Replace with your actual API call to check if the user has applied
-    // For now, just set to false (not applied)
-    // Example: final applied = await ApiService.hasAppliedForJob(widget.job.id);
-    setState(() {
-      _hasApplied = false;
-      _loadingStatus = false;
-    });
+    try {
+      final applied = await ApiService.hasAppliedForJob(widget.job.id);
+      setState(() {
+        _hasApplied = applied;
+        _loadingStatus = false;
+      });
+    } catch (e) {
+      print('Error checking application status: $e');
+      setState(() {
+        _hasApplied = false;
+        _loadingStatus = false;
+      });
+    }
   }
 
   @override
@@ -425,27 +433,70 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   Widget _buildApplyButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: (_hasApplied || _loadingStatus)
-            ? null
-            : () => _applyForJob(context),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).primaryColor,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+      child: Container(
+        height: 56,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            colors: _hasApplied
+                ? [Colors.grey, Colors.grey.withOpacity(0.8)]
+                : [
+                    Theme.of(context).primaryColor,
+                    Theme.of(context).primaryColor.withOpacity(0.8)
+                  ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
           ),
+          boxShadow: [
+            BoxShadow(
+              color:
+                  (_hasApplied ? Colors.grey : Theme.of(context).primaryColor)
+                      .withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
-        child: _loadingStatus
-            ? const CircularProgressIndicator()
-            : Text(
-                _hasApplied ? 'Already Applied' : 'Apply for this Job',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+        child: ElevatedButton(
+          onPressed: (_hasApplied || _loadingStatus)
+              ? null
+              : () => _applyForJob(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          child: _loadingStatus
+              ? const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      _hasApplied ? Icons.check_circle : Icons.work,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      _hasApplied ? 'Already Applied' : 'Apply for this Job',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+        ),
       ),
     );
   }
@@ -554,6 +605,28 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   void _applyForJob(BuildContext context) {
+    if (_hasApplied) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text('You have already applied for this job'),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+      return;
+    }
+
     if (widget.job.questionnaire.isNotEmpty) {
       Navigator.push(
         context,
@@ -564,6 +637,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               setState(() {
                 _hasApplied = true;
               });
+              // Update the provider as well
+              context
+                  .read<JobsProvider>()
+                  .setApplicationStatus(widget.job.id, true);
             },
           ),
         ),

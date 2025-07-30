@@ -3,14 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../models/announcement.dart';
 import '../../providers/announcements_provider.dart';
+import '../../constants/app_colors.dart';
 
 class AnnouncementDetailScreen extends StatefulWidget {
   final Announcement announcement;
 
-  const AnnouncementDetailScreen({
-    super.key,
-    required this.announcement,
-  });
+  const AnnouncementDetailScreen({super.key, required this.announcement});
 
   @override
   State<AnnouncementDetailScreen> createState() =>
@@ -26,9 +24,9 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
     super.initState();
     // Load fresh announcement data
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context
-          .read<AnnouncementsProvider>()
-          .loadAnnouncementDetails(widget.announcement.id);
+      context.read<AnnouncementsProvider>().loadAnnouncementDetails(
+            widget.announcement.id,
+          );
     });
   }
 
@@ -41,12 +39,26 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Announcement'),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'Announcement',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: _shareAnnouncement,
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.share_outlined),
+              onPressed: _shareAnnouncement,
+            ),
           ),
         ],
       ),
@@ -56,17 +68,21 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
               provider.selectedAnnouncement ?? widget.announcement;
 
           if (provider.isLoading && provider.selectedAnnouncement == null) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              ),
+            );
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header
                 _buildHeader(announcement),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
 
                 // Content
                 _buildContent(announcement),
@@ -87,10 +103,20 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
   }
 
   Widget _buildHeader(Announcement announcement) {
-    return Card(
-      elevation: 2,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -98,99 +124,118 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
             Row(
               children: [
                 if (announcement.isPinned)
-                  Icon(
-                    Icons.push_pin,
-                    color: Theme.of(context).primaryColor,
-                    size: 24,
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.push_pin,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
                   ),
-                if (announcement.isPinned) const SizedBox(width: 8),
+                if (announcement.isPinned) const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     announcement.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                      height: 1.3,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
             // Category and priority
             Row(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: _getCategoryColor(announcement.category)
-                        .withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
+                    color: _getCategoryColor(
+                      announcement.category,
+                    ).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     announcement.categoryDisplayName,
                     style: TextStyle(
                       fontSize: 14,
                       color: _getCategoryColor(announcement.category),
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: _getPriorityColor(announcement.priority)
-                        .withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
+                    color: _getPriorityColor(
+                      announcement.priority,
+                    ).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     announcement.priorityDisplayName,
                     style: TextStyle(
                       fontSize: 14,
                       color: _getPriorityColor(announcement.priority),
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
             // Author and date
             Row(
               children: [
                 CircleAvatar(
-                  radius: 16,
-                  backgroundColor: Colors.grey[300],
+                  radius: 20,
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
                   child: Text(
                     announcement.author.firstName[0].toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 14,
+                    style: TextStyle(
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         announcement.author.fullName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       Text(
                         _formatDate(
-                            announcement.publishDate ?? announcement.createdAt),
+                          announcement.publishDate ?? announcement.createdAt,
+                        ),
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
@@ -205,25 +250,54 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
   }
 
   Widget _buildContent(Announcement announcement) {
-    return Card(
-      elevation: 1,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Content',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.article_outlined,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Content',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(
               announcement.content,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
+                color: AppColors.textSecondary,
                 height: 1.6,
               ),
             ),
@@ -234,25 +308,35 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
   }
 
   Widget _buildEngagementStats(Announcement announcement) {
-    return Card(
-      elevation: 1,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _buildStatItem(
-              Icons.visibility,
+              Icons.visibility_outlined,
               '${announcement.engagement.views}',
               'Views',
             ),
             _buildStatItem(
-              Icons.favorite,
+              Icons.favorite_outlined,
               '${announcement.engagement.likeCount}',
               'Likes',
             ),
             _buildStatItem(
-              Icons.comment,
+              Icons.comment_outlined,
               '${announcement.engagement.commentCount}',
               'Comments',
             ),
@@ -265,20 +349,29 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
   Widget _buildStatItem(IconData icon, String count, String label) {
     return Column(
       children: [
-        Icon(icon, size: 24, color: Colors.grey[600]),
-        const SizedBox(height: 4),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, size: 24, color: AppColors.primary),
+        ),
+        const SizedBox(height: 8),
         Text(
           count,
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: 20,
             fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
           ),
         ),
         Text(
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey[600],
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
@@ -286,62 +379,134 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
   }
 
   Widget _buildCommentsSection(
-      Announcement announcement, AnnouncementsProvider provider) {
-    return Card(
-      elevation: 1,
+    Announcement announcement,
+    AnnouncementsProvider provider,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.comment_outlined,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 const Text(
                   'Comments',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  '(${announcement.engagement.commentCount})',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${announcement.engagement.commentCount}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // Add comment
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _commentController,
-                    decoration: const InputDecoration(
-                      hintText: 'Add a comment...',
-                      border: OutlineInputBorder(),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.divider, width: 1),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _commentController,
+                      decoration: InputDecoration(
+                        hintText: 'Add a comment...',
+                        hintStyle: TextStyle(
+                          color: AppColors.textSecondary.withOpacity(0.6),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.all(16),
+                      ),
+                      maxLines: 2,
                     ),
-                    maxLines: 2,
                   ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _addComment,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Post'),
-                ),
-              ],
+                  Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _addComment,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 16,
+                              width: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Text(
+                              'Post',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // Comments list
             if (announcement.engagement.comments.isEmpty)
@@ -350,17 +515,25 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
                   padding: const EdgeInsets.all(32.0),
                   child: Column(
                     children: [
-                      Icon(
-                        Icons.comment_outlined,
-                        size: 48,
-                        color: Colors.grey[400],
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(
+                          Icons.comment_outlined,
+                          size: 48,
+                          color: AppColors.textSecondary.withOpacity(0.5),
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'No comments yet',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.grey[600],
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -368,7 +541,7 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
                         'Be the first to comment!',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[500],
+                          color: AppColors.textSecondary.withOpacity(0.7),
                         ),
                       ),
                     ],
@@ -382,7 +555,71 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
                 itemCount: announcement.engagement.comments.length,
                 itemBuilder: (context, index) {
                   final comment = announcement.engagement.comments[index];
-                  return _buildCommentItem(comment);
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundColor: AppColors.primary.withOpacity(
+                                0.1,
+                              ),
+                              child: Text(
+                                comment.userName.isNotEmpty
+                                    ? comment.userName[0].toUpperCase()
+                                    : 'U',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    comment.userName,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  Text(
+                                    _formatDate(comment.createdAt),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          comment.content,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 },
               ),
           ],
@@ -391,64 +628,11 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
     );
   }
 
-  Widget _buildCommentItem(AnnouncementComment comment) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: Colors.grey[300],
-                child: Text(
-                  comment.userName.isNotEmpty
-                      ? comment.userName[0].toUpperCase()
-                      : '?',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      comment.userName.isNotEmpty
-                          ? comment.userName
-                          : 'Anonymous',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      _formatDate(comment.createdAt),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            comment.content,
-            style: const TextStyle(fontSize: 14),
-          ),
-        ],
-      ),
-    );
+  void _shareAnnouncement() {
+    // Implement share functionality
   }
 
-  Future<void> _addComment() async {
+  void _addComment() async {
     if (_commentController.text.trim().isEmpty) return;
 
     setState(() {
@@ -458,69 +642,67 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
     try {
       final provider = context.read<AnnouncementsProvider>();
       await provider.addComment(
-          widget.announcement.id, _commentController.text.trim());
+        widget.announcement.id,
+        _commentController.text.trim(),
+      );
       _commentController.clear();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Comment added successfully')),
-        );
-      }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add comment: ${e.toString()}')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Expanded(child: Text(e.toString().replaceAll('Exception: ', ''))),
+            ],
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _isLoading = false;
+      });
     }
-  }
-
-  void _shareAnnouncement() {
-    // TODO: Implement share functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Share functionality coming soon...')),
-    );
   }
 
   Color _getCategoryColor(String category) {
     switch (category) {
       case 'general':
-        return Colors.blue;
+        return AppColors.primary;
       case 'jobs':
-        return Colors.green;
+        return AppColors.success;
       case 'news':
-        return Colors.purple;
+        return AppColors.secondary;
       case 'scholarships':
-        return Colors.orange;
+        return AppColors.warning;
       case 'events':
-        return Colors.red;
+        return AppColors.error;
       case 'achievements':
         return Colors.teal;
       case 'obituary':
-        return Colors.grey;
+        return AppColors.textSecondary;
       default:
-        return Colors.blue;
+        return AppColors.primary;
     }
   }
 
   Color _getPriorityColor(String priority) {
     switch (priority) {
       case 'urgent':
-        return Colors.red;
+        return AppColors.error;
       case 'high':
-        return Colors.orange;
+        return AppColors.warning;
       case 'medium':
-        return Colors.blue;
+        return AppColors.primary;
       case 'low':
-        return Colors.grey;
+        return AppColors.textSecondary;
       default:
-        return Colors.blue;
+        return AppColors.primary;
     }
   }
 
