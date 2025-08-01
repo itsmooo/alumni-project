@@ -113,43 +113,46 @@ app.use("*", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-const server = app.listen(PORT,"0.0.0.0", () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
-// Socket.io setup for real-time messaging
-const io = require("socket.io")(server, {
-  cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    methods: ["GET", "POST"],
-  },
-});
-
-// Socket.io connection handling
-io.use((socket, next) => {
-  const token = socket.handshake.auth.token;
-  if (token) {
-    // Verify JWT token here
-    next();
-  } else {
-    next(new Error("Authentication error"));
-  }
-});
-
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-
-  socket.on("join-room", (roomId) => {
-    socket.join(roomId);
+// Only start server if not in Vercel environment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  const server = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT}`);
   });
 
-  socket.on("send-message", (data) => {
-    socket.to(data.roomId).emit("receive-message", data);
+  // Socket.io setup for real-time messaging (only in development)
+  const io = require("socket.io")(server, {
+    cors: {
+      origin: process.env.FRONTEND_URL || "http://localhost:3000",
+      methods: ["GET", "POST"],
+    },
   });
 
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+  // Socket.io connection handling
+  io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    if (token) {
+      // Verify JWT token here
+      next();
+    } else {
+      next(new Error("Authentication error"));
+    }
   });
-});
+
+  io.on("connection", (socket) => {
+    console.log("User connected:", socket.id);
+
+    socket.on("join-room", (roomId) => {
+      socket.join(roomId);
+    });
+
+    socket.on("send-message", (data) => {
+      socket.to(data.roomId).emit("receive-message", data);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.id);
+    });
+  });
+}
 
 module.exports = app;
