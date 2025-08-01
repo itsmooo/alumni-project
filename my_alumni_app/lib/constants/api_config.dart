@@ -4,12 +4,14 @@ class ApiConfig {
   static const String androidEmulatorUrl = 'http://10.0.2.2:5000/api';
   static const String webDevelopmentUrl = 'http://127.0.0.1:5000/api';
   static const String iosSimulatorUrl = 'http://localhost:5000/api';
-  static const String physicalDeviceUrl =
-      'http://192.168.1.100:5000/api'; // Replace with your IP
+  static const String physicalDeviceUrl = 'http://10.1.1.33:5000/api';
+
+  // Updated with your actual IP
 
   // Current active base URL
   // Change this based on your development environment
-  static const String baseUrl = webDevelopmentUrl;
+  static const String baseUrl =
+      physicalDeviceUrl; // Changed to use physical device URL
 
   // API Endpoints
   static const String authLogin = '/auth/login';

@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken")
 const { body, validationResult } = require("express-validator")
 const User = require("../models/User")
 const { authenticateToken } = require("../middleware/auth")
-const { sendSMS, sendEmail } = require("../services/notificationService")
+const { sendEmail } = require("../services/notificationService")
 const crypto = require("crypto")
 
 /**
@@ -444,7 +444,7 @@ router.post(
 
       await user.save()
 
-      // Send verification email and SMS
+      // Send verification email
       await sendEmail({
         to: email,
         subject: "Verify Your Alumni Network Account",
@@ -455,16 +455,6 @@ router.post(
         <p>This link expires in 24 hours.</p>
       `,
       })
-
-      // Send SMS but don't fail registration if SMS fails
-      const smsResult = await sendSMS({
-        to: phone,
-        message: `Your Alumni Network verification code is: ${phoneCode}. Valid for 24 hours.`,
-      })
-
-      if (!smsResult) {
-        console.log(`SMS failed for user ${email}, but registration will continue`)
-      }
 
       // Generate JWT token
       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" })
@@ -723,7 +713,7 @@ router.post(
       user.resetPassword.expires = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
       await user.save()
 
-      // Send reset link via email and SMS
+      // Send reset link via email
       const resetUrl = `http://localhost:5000/api/auth/reset-password-page?token=${resetToken}`
 
       await sendEmail({
@@ -738,17 +728,7 @@ router.post(
       `,
       })
 
-      // Send SMS but don't fail if SMS fails
-      const smsResult = await sendSMS({
-        to: user.phone,
-        message: `Password reset link: ${resetUrl}. Valid for 1 hour.`,
-      })
-
-      if (!smsResult) {
-        console.log(`SMS failed for user ${user.email}, but password reset email was sent`)
-      }
-
-      res.json({ message: "Password reset instructions sent to your email and phone" })
+              res.json({ message: "Password reset instructions sent to your email" })
     } catch (error) {
       console.error("Forgot password error:", error)
       res.status(500).json({ message: "Server error during password reset request" })

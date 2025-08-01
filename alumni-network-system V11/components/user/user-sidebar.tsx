@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import {
-  BarChart3,
+  Home,
   Users,
   Calendar,
   Megaphone,
@@ -16,22 +16,20 @@ import {
   Settings,
   FileText,
   CreditCard,
-  Shield,
+  Bell,
   HelpCircle,
   LogOut,
   Menu,
-  Home,
-  Database,
-  UserCheck,
-  TrendingUp,
-  Mail,
+  User,
+  MessageSquare,
   ChevronRight,
-  Crown,
+  GraduationCap,
+  Network,
+  BookOpen,
 } from "lucide-react"
 import { useSelector, useDispatch } from "react-redux"
 import type { RootState } from "@/lib/store"
 import { logout } from "@/lib/slices/authSlice"
-import { UserForm } from "@/components/admin/user-form"
 import { Badge } from "@/components/ui/badge"
 
 interface SidebarItem {
@@ -47,114 +45,150 @@ interface SidebarItem {
 const sidebarItems: SidebarItem[] = [
   {
     title: "Dashboard",
-    href: "/admin/dashboard",
-    icon: BarChart3,
+    href: "/dashboard",
+    icon: Home,
     gradient: "from-blue-500 to-purple-600",
   },
   {
-    title: "User Management",
-    href: "/admin/users",
+    title: "Alumni Network",
+    href: "/alumni",
     icon: Users,
     gradient: "from-green-500 to-emerald-600",
     children: [
       {
-        title: "All Users",
-        href: "/admin/users",
+        title: "All Alumni",
+        href: "/alumni",
         icon: Users,
       },
       {
-        title: "Create User",
-        href: "/admin/users?addUser=1",
-        icon: UserCheck,
+        title: "My Connections",
+        href: "/alumni/connections",
+        icon: Network,
+      },
+      {
+        title: "Find Alumni",
+        href: "/alumni/search",
+        icon: User,
       },
     ],
   },
   {
-    title: "Event Management",
-    href: "/admin/events",
+    title: "Events",
+    href: "/events",
     icon: Calendar,
     gradient: "from-orange-500 to-red-600",
     children: [
       {
         title: "All Events",
-        href: "/admin/events",
+        href: "/events",
         icon: Calendar,
       },
       {
-        title: "Create Event",
-        href: "/admin/events?addEvent=1",
+        title: "My Events",
+        href: "/events/my-events",
+        icon: Calendar,
+      },
+      {
+        title: "Register for Events",
+        href: "/events/register",
         icon: Calendar,
       },
     ],
   },
   {
     title: "Announcements",
-    href: "/admin/announcements",
+    href: "/announcements",
     icon: Megaphone,
     gradient: "from-purple-500 to-pink-600",
     children: [
       {
         title: "All Announcements",
-        href: "/admin/announcements",
+        href: "/announcements",
         icon: Megaphone,
       },
       {
-        title: "Create Announcement",
-        href: "/admin/announcements/create",
+        title: "My Announcements",
+        href: "/announcements/my",
         icon: Megaphone,
       },
     ],
   },
   {
-    title: "Job Management",
-    href: "/admin/jobs",
+    title: "Job Board",
+    href: "/jobs",
     icon: Briefcase,
     gradient: "from-indigo-500 to-blue-600",
     children: [
       {
         title: "All Jobs",
-        href: "/admin/jobs",
+        href: "/jobs",
         icon: Briefcase,
       },
       {
-        title: "Create Job",
-        href: "/admin/jobs?addJob=1",
+        title: "My Applications",
+        href: "/jobs/applications",
+        icon: FileText,
+      },
+      {
+        title: "Post a Job",
+        href: "/jobs/post",
         icon: Briefcase,
       },
     ],
   },
   {
     title: "Payments",
-    href: "/admin/payments",
+    href: "/payments",
     icon: CreditCard,
     gradient: "from-emerald-500 to-teal-600",
     children: [
       {
-        title: "All Payments",
-        href: "/admin/payments",
+        title: "My Payments",
+        href: "/payments",
         icon: CreditCard,
       },
       {
-        title: "Financial Reports",
-        href: "/admin/payments/reports",
+        title: "Payment History",
+        href: "/payments/history",
         icon: FileText,
+      },
+      {
+        title: "Donate",
+        href: "/payments/donate",
+        icon: CreditCard,
       },
     ],
   },
   {
-    title: "Send Email",
-    href: "/admin/send-email",
-    icon: Mail,
+    title: "Resources",
+    href: "/resources",
+    icon: BookOpen,
     gradient: "from-rose-500 to-pink-600",
+    children: [
+      {
+        title: "Library",
+        href: "/resources/library",
+        icon: BookOpen,
+      },
+      {
+        title: "Career Resources",
+        href: "/resources/career",
+        icon: Briefcase,
+      },
+      {
+        title: "Mentorship",
+        href: "/resources/mentorship",
+        icon: Users,
+      },
+    ],
   },
-
 ]
 
-interface AdminSidebarProps {
+interface UserSidebarProps {
   className?: string
 }
 
-export function AdminSidebar({ className }: AdminSidebarProps) {
+export function UserSidebar({ className }: UserSidebarProps) {
   const pathname = usePathname()
   const dispatch = useDispatch()
   const { user } = useSelector((state: RootState) => state.auth)
@@ -176,15 +210,15 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
     <div className="flex h-full flex-col bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-r border-slate-200 dark:border-slate-800">
       {/* Enhanced Header */}
       <div className="flex h-20 items-center border-b border-slate-200 dark:border-slate-800 px-6 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
-        <Link href="/admin/dashboard" className="flex items-center space-x-3 group">
+        <Link href="/dashboard" className="flex items-center space-x-3 group">
           <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-            <Crown className="h-6 w-6 text-white" />
+            <GraduationCap className="h-6 w-6 text-white" />
           </div>
           <div>
             <span className="font-bold text-lg bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-              Admin Panel
+              Alumni Network
             </span>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Control Center</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Connect & Grow</p>
           </div>
         </Link>
       </div>
@@ -193,7 +227,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
       <div className="border-b border-slate-200 dark:border-slate-800 p-6 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
         <div className="flex items-center space-x-4">
           <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-            <Users className="h-6 w-6 text-white" />
+            <User className="h-6 w-6 text-white" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">

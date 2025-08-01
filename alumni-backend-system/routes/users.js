@@ -269,8 +269,6 @@ const router = express.Router()
  *             properties:
  *               emailNotifications:
  *                 type: boolean
- *               smsNotifications:
- *                 type: boolean
  *               pushNotifications:
  *                 type: boolean
  *               privacy:
@@ -984,7 +982,7 @@ router.put(
   requireRole(["alumni"]),
   [
     body("emailNotifications").optional().isBoolean(),
-    body("smsNotifications").optional().isBoolean(),
+    
     body("pushNotifications").optional().isBoolean(),
     body("privacy.showEmail").optional().isBoolean(),
     body("privacy.showPhone").optional().isBoolean(),
@@ -1003,14 +1001,12 @@ router.put(
       }
 
       // Update preferences
-      const { emailNotifications, smsNotifications, pushNotifications, privacy } = req.body
+      const { emailNotifications, pushNotifications, privacy } = req.body
 
       if (emailNotifications !== undefined) {
         user.preferences.emailNotifications = emailNotifications
       }
-      if (smsNotifications !== undefined) {
-        user.preferences.smsNotifications = smsNotifications
-      }
+
       if (pushNotifications !== undefined) {
         user.preferences.pushNotifications = pushNotifications
       }
@@ -1345,7 +1341,7 @@ router.post("/admin", authenticateToken, requireRole(["admin"]), [
       },
       preferences: {
         emailNotifications: true,
-        smsNotifications: true,
+
         pushNotifications: true,
         privacy: {
           showEmail: true,

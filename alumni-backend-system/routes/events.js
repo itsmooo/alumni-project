@@ -3,7 +3,7 @@ const { body, query, validationResult } = require("express-validator")
 const Event = require("../models/Event")
 const User = require("../models/User")
 const { authenticateToken, requireRole, optionalAuth } = require("../middleware/auth")
-const { sendBulkEmail, sendBulkSMS } = require("../services/notificationService")
+const { sendBulkEmail } = require("../services/notificationService")
 
 const router = express.Router()
 
@@ -2655,22 +2655,10 @@ router.post(
         }
       }
 
-      if (type === "sms" || type === "both") {
-        const smsRecipients = attendees
-          .filter((a) => a.user.preferences?.smsNotifications !== false)
-          .map((a) => a.user.phone)
-
-        if (smsRecipients.length > 0) {
-          const smsMessage = `Reminder: ${event.title} on ${event.date.start.toLocaleDateString()}. ${message}`
-          smsResults = await sendBulkSMS(smsRecipients, smsMessage)
-        }
-      }
-
       res.json({
         message: "Reminders sent successfully",
         results: {
           email: emailResults,
-          sms: smsResults,
         },
       })
     } catch (error) {

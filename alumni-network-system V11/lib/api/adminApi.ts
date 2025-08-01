@@ -510,7 +510,7 @@ export const adminApi = api.injectEndpoints({
       { success: boolean; sent: number },
       { 
         recipients: string[];
-        type: "email" | "sms" | "push";
+        type: "email" | "push";
         subject?: string;
         message: string;
       }

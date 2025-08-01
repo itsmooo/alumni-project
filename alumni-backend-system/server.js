@@ -23,6 +23,8 @@ const alumniRoutes = require("./routes/alumni");
 const donationRoutes = require("./routes/donations");
 const notificationRoutes = require("./routes/notifications");
 const transactionRoutes = require("./routes/transactions");
+const communicationRoutes = require("./routes/communications");
+const emailRoutes = require("./routes/emails");
 
 // Import middleware
 const errorHandler = require("./middleware/errorHandler");
@@ -89,6 +91,8 @@ app.use("/api/alumni", alumniRoutes);
 app.use("/api/donations", donationRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/transactions", transactionRoutes);
+app.use("/api/communications", communicationRoutes);
+app.use("/api/emails", emailRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

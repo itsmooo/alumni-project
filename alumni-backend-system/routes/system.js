@@ -46,7 +46,7 @@ router.get("/settings", authenticateToken, requireRole(["admin"]), async (req, r
       },
       notifications: {
         emailEnabled: true,
-        smsEnabled: true,
+        emailEnabled: true,
         pushEnabled: true,
       },
       payments: {

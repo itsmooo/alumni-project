@@ -5,7 +5,7 @@ import { AdminSidebar } from "@/components/admin/admin-sidebar"
 import { DashboardStats } from "@/components/admin/dashboard-stats"
 import { AnalyticsCharts } from "@/components/admin/analytics-charts"
 import { FinancialDashboard } from "@/components/admin/financial-dashboard"
-import { BulkCommunication } from "@/components/admin/bulk-communication"
+
 import { useGetDashboardStatsQuery } from "@/lib/api/adminApi"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -184,9 +184,23 @@ function AdminDashboardContent() {
                 <FinancialDashboard data={dashboardData?.payments} />
               </TabsContent>
 
-              {/* Bulk Communication Tab */}
+              {/* Communication Tab */}
               <TabsContent value="communication" className="space-y-8">
-                <BulkCommunication />
+                <div className="text-center py-12">
+                  <MessageSquare className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+                    Email Management
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400 mb-6">
+                    Use the "Send Email" option in the sidebar to send emails to alumni
+                  </p>
+                  <Button asChild>
+                    <a href="/admin/send-email" className="inline-flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4" />
+                      Go to Send Email
+                    </a>
+                  </Button>
+                </div>
               </TabsContent>
             </Tabs>
           </div>

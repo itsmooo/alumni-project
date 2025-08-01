@@ -72,10 +72,7 @@ const userSchema = new mongoose.Schema(
         type: Boolean,
         default: true,
       },
-      smsNotifications: {
-        type: Boolean,
-        default: true,
-      },
+
       pushNotifications: {
         type: Boolean,
         default: true,
