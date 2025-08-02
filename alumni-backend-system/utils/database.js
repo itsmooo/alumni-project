@@ -7,8 +7,15 @@ async function connectToDatabase() {
     return cachedConnection;
   }
 
+  // Get MongoDB URI - add your actual MongoDB Atlas URI here for testing
+  const mongoUri = process.env.MONGODB_URI || "mongodb+srv://user:user@cluster0.i6rkc5n.mongodb.net/alumni-network?retryWrites=true&w=majority&";
+  
+  console.log('Attempting to connect to MongoDB...');
+  console.log('MongoDB URI length:', mongoUri.length);
+  console.log('MongoDB URI starts with:', mongoUri.substring(0, 20) + '...');
+
   try {
-    const connection = await mongoose.connect(process.env.MONGODB_URI, {
+    const connection = await mongoose.connect(mongoUri, {
       // Serverless-optimized settings
       maxPoolSize: 1,
       serverSelectionTimeoutMS: 5000,
