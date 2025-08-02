@@ -981,4 +981,14 @@ router.post("/refresh", authenticateToken, async (req, res) => {
   }
 })
 
+// Test endpoint to check environment variables
+router.get("/test-env", (req, res) => {
+  res.json({
+    hasMongoUri: !!process.env.MONGODB_URI,
+    hasJwtSecret: !!process.env.JWT_SECRET,
+    nodeEnv: process.env.NODE_ENV,
+    mongoUriLength: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0
+  });
+});
+
 module.exports = router
