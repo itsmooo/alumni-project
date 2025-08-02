@@ -14,8 +14,7 @@ async function connectToDatabase() {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
       bufferCommands: false,
-      bufferMaxEntries: 0,
-      // Add retry logic
+      // Remove bufferMaxEntries as it's not supported
       retryWrites: true,
       w: 'majority',
     });
