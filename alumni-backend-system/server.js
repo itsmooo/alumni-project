@@ -6,6 +6,7 @@ const compression = require("compression");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const { swaggerSpec, swaggerUi } = require("./swagger");
+const { connectToDatabase } = require("./utils/database");
 require("dotenv").config();
 
 // Import routes
@@ -69,12 +70,9 @@ app.use(
 );
 
 // Database connection
-mongoose
-  .connect(
-    process.env.MONGODB_URI || "mongodb://localhost:27017/alumni-network"
-  )
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+connectToDatabase()
+  .then(() => console.log("Database connection established"))
+  .catch((err) => console.error("Database connection failed:", err));
 
 // Routes
 app.use("/api/auth", authRoutes);

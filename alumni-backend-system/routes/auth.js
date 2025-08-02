@@ -5,6 +5,7 @@ const User = require("../models/User")
 const { authenticateToken } = require("../middleware/auth")
 const { sendEmail } = require("../services/notificationService")
 const crypto = require("crypto")
+const mongoose = require("mongoose")
 
 /**
  * @swagger
@@ -480,6 +481,12 @@ router.post(
   ],
   async (req, res) => {
     try {
+      // Check database connection
+      if (mongoose.connection.readyState !== 1) {
+        console.error("Database not connected. ReadyState:", mongoose.connection.readyState);
+        return res.status(500).json({ message: "Database connection not ready" });
+      }
+
       const errors = validationResult(req)
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() })
