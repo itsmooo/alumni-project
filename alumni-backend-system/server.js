@@ -6,7 +6,7 @@ const compression = require("compression");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const { swaggerSpec, swaggerUi } = require("./swagger");
-const { connectToDatabase } = require("./utils/database");
+const { connectToDatabase, ensureConnection } = require("./utils/database");
 require("dotenv").config();
 
 // Import routes
@@ -30,6 +30,7 @@ const emailRoutes = require("./routes/emails");
 // Import middleware
 const errorHandler = require("./middleware/errorHandler");
 const { authenticateToken } = require("./middleware/auth");
+const { ensureDatabaseConnection } = require("./middleware/database");
 
 const app = express();
 
@@ -82,28 +83,29 @@ connectToDatabase()
   .then(() => console.log("Database connection established"))
   .catch((err) => console.error("Database connection failed:", err));
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/events", eventRoutes);
-app.use("/api/announcements", announcementRoutes);
-app.use("/api/payments", paymentRoutes);
-app.use("/api/jobs", jobRoutes);
+// Routes with database connection middleware for critical endpoints
+app.use("/api/auth", ensureDatabaseConnection, authRoutes);
+app.use("/api/users", ensureDatabaseConnection, userRoutes);
+app.use("/api/events", ensureDatabaseConnection, eventRoutes);
+app.use("/api/announcements", ensureDatabaseConnection, announcementRoutes);
+app.use("/api/payments", ensureDatabaseConnection, paymentRoutes);
+app.use("/api/jobs", ensureDatabaseConnection, jobRoutes);
 // app.use("/api/messages", messageRoutes)
-app.use("/api/dashboard", dashboardRoutes);
-app.use("/api/system", systemRoutes);
-app.use("/api/upload", uploadRoutes);
-app.use("/api/alumni", alumniRoutes);
-app.use("/api/donations", donationRoutes);
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/transactions", transactionRoutes);
-app.use("/api/communications", communicationRoutes);
-app.use("/api/emails", emailRoutes);
+app.use("/api/dashboard", ensureDatabaseConnection, dashboardRoutes);
+app.use("/api/system", ensureDatabaseConnection, systemRoutes);
+app.use("/api/upload", ensureDatabaseConnection, uploadRoutes);
+app.use("/api/alumni", ensureDatabaseConnection, alumniRoutes);
+app.use("/api/donations", ensureDatabaseConnection, donationRoutes);
+app.use("/api/notifications", ensureDatabaseConnection, notificationRoutes);
+app.use("/api/transactions", ensureDatabaseConnection, transactionRoutes);
+app.use("/api/communications", ensureDatabaseConnection, communicationRoutes);
+app.use("/api/emails", ensureDatabaseConnection, emailRoutes);
 
 // Health check endpoint
 app.get("/api/health", async (req, res) => {
   try {
     // Test database connection
+    await ensureConnection();
     const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
     
     res.status(200).json({

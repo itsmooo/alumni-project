@@ -2,17 +2,29 @@ const mongoose = require('mongoose');
 
 let cachedConnection = null;
 
-async function connectToDatabase() {
-  // For serverless environments, always create a new connection
-  if (process.env.VERCEL && cachedConnection) {
-    try {
-      // Test if the connection is still alive
-      await cachedConnection.connection.db.admin().ping();
-      return cachedConnection;
-    } catch (error) {
-      console.log('Cached connection is dead, creating new connection...');
-      cachedConnection = null;
+// Helper function to ensure connection is ready
+async function ensureConnection() {
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+  
+  if (mongoose.connection.readyState === 2) {
+    // Connecting, wait a bit
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (mongoose.connection.readyState === 1) {
+      return mongoose.connection;
     }
+  }
+  
+  // Not connected, establish new connection
+  return await connectToDatabase();
+}
+
+async function connectToDatabase() {
+  // For Vercel serverless, disable connection caching completely
+  if (process.env.VERCEL) {
+    console.log('Vercel environment detected - using fresh connection');
+    cachedConnection = null;
   }
 
   // Get MongoDB URI
@@ -23,25 +35,47 @@ async function connectToDatabase() {
   console.log('Is Vercel:', !!process.env.VERCEL);
 
   try {
-    const connection = await mongoose.connect(mongoUri, {
-      // Serverless-optimized settings for Vercel
+    // For Vercel, use minimal connection settings
+    const connectionOptions = process.env.VERCEL ? {
+      // Ultra-minimal settings for serverless
       maxPoolSize: 1,
       minPoolSize: 0,
-      serverSelectionTimeoutMS: 15000,
-      socketTimeoutMS: 45000,
+      serverSelectionTimeoutMS: 20000,
+      socketTimeoutMS: 60000,
       bufferCommands: false,
       bufferMaxEntries: 0,
       retryWrites: true,
       w: 'majority',
-      // Additional settings for better reliability
-      connectTimeoutMS: 15000,
+      connectTimeoutMS: 20000,
+      heartbeatFrequencyMS: 30000,
+      maxIdleTimeMS: 60000,
+      autoIndex: false,
+      // Disable all buffering
+      bufferCommands: false,
+      bufferMaxEntries: 0,
+      // Force immediate connection
+      directConnection: true,
+    } : {
+      // Normal settings for non-serverless
+      maxPoolSize: 10,
+      minPoolSize: 2,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      bufferCommands: true,
+      retryWrites: true,
+      w: 'majority',
+      connectTimeoutMS: 10000,
       heartbeatFrequencyMS: 10000,
       maxIdleTimeMS: 30000,
-      // Disable auto-index creation in production
       autoIndex: process.env.NODE_ENV !== 'production',
-    });
+    };
 
-    cachedConnection = connection;
+    const connection = await mongoose.connect(mongoUri, connectionOptions);
+
+    if (!process.env.VERCEL) {
+      cachedConnection = connection;
+    }
+    
     console.log('Connected to MongoDB successfully');
     return connection;
   } catch (error) {
@@ -81,4 +115,4 @@ process.on('SIGINT', async () => {
   }
 });
 
-module.exports = { connectToDatabase }; 
+module.exports = { connectToDatabase, ensureConnection }; 

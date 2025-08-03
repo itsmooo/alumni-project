@@ -17,10 +17,13 @@ This document outlines the fixes applied to resolve the deployment issues on Ver
 **Problem**: `MongooseError: Operation buffering timed out after 10000ms`
 
 **Solution**:
-- Increased connection timeouts for serverless environments
-- Added connection pooling optimization for Vercel
-- Implemented better connection caching and retry logic
-- Added connection health checks
+- **Complete connection overhaul for serverless environments**
+- Disabled connection caching for Vercel to prevent stale connections
+- Implemented `ensureConnection()` function for robust connection management
+- Added database middleware to ensure connection before each request
+- Increased all timeouts (20s server selection, 60s socket timeout)
+- Used `directConnection: true` for immediate connection establishment
+- Added connection health checks and retry logic
 
 ## Changes Made
 
