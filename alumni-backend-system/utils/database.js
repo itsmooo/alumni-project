@@ -23,16 +23,11 @@ async function ensureConnection() {
 async function connectToDatabase() {
   // For Vercel serverless, disable connection caching completely
   if (process.env.VERCEL) {
-    console.log('Vercel environment detected - using fresh connection');
     cachedConnection = null;
   }
 
   // Get MongoDB URI
   const mongoUri = process.env.MONGODB_URI || "mongodb+srv://user:user@cluster0.i6rkc5n.mongodb.net/alumni-network?retryWrites=true&w=majority&";
-  
-  console.log('Attempting to connect to MongoDB...');
-  console.log('Environment:', process.env.NODE_ENV);
-  console.log('Is Vercel:', !!process.env.VERCEL);
 
   try {
     // For Vercel, use minimal connection settings
@@ -76,7 +71,6 @@ async function connectToDatabase() {
       cachedConnection = connection;
     }
     
-    console.log('Connected to MongoDB successfully');
     return connection;
   } catch (error) {
     console.error('MongoDB connection error:', error);
@@ -91,23 +85,13 @@ mongoose.connection.on('error', (err) => {
 });
 
 mongoose.connection.on('disconnected', () => {
-  console.log('MongoDB disconnected');
   cachedConnection = null;
-});
-
-mongoose.connection.on('connected', () => {
-  console.log('MongoDB connected');
-});
-
-mongoose.connection.on('reconnected', () => {
-  console.log('MongoDB reconnected');
 });
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
   try {
     await mongoose.connection.close();
-    console.log('MongoDB connection closed through app termination');
     process.exit(0);
   } catch (err) {
     console.error('Error during MongoDB connection closure:', err);

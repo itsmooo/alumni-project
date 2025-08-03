@@ -80,7 +80,6 @@ app.use(
 
 // Database connection
 connectToDatabase()
-  .then(() => console.log("Database connection established"))
   .catch((err) => console.error("Database connection failed:", err));
 
 // Routes with database connection middleware for critical endpoints
@@ -113,8 +112,6 @@ app.get("/api/health", async (req, res) => {
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       database: dbStatus,
-      environment: process.env.NODE_ENV,
-      isVercel: !!process.env.VERCEL,
     });
   } catch (error) {
     res.status(500).json({

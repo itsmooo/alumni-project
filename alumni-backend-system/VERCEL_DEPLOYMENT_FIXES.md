@@ -102,7 +102,6 @@ If issues persist:
 1. Check Vercel function logs for detailed error messages
 2. Verify MongoDB Atlas network access allows Vercel IPs
 3. Ensure all environment variables are properly set
-4. Test with the provided test script: `node test_vercel_fixes.js`
 
 ## Performance Optimization
 
