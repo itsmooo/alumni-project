@@ -33,15 +33,23 @@ const { authenticateToken } = require("./middleware/auth");
 
 const app = express();
 
+// Trust proxy for Vercel deployment
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 app.use(compression());
 app.use(morgan("combined"));
 
-// Rate limiting
+// Rate limiting with proper configuration for Vercel
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Trust the X-Forwarded-For header
+  skipSuccessfulRequests: false,
+  skipFailedRequests: false,
 });
 app.use(limiter);
 
@@ -93,12 +101,26 @@ app.use("/api/communications", communicationRoutes);
 app.use("/api/emails", emailRoutes);
 
 // Health check endpoint
-app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    status: "OK",
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
+app.get("/api/health", async (req, res) => {
+  try {
+    // Test database connection
+    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+    
+    res.status(200).json({
+      status: "OK",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      database: dbStatus,
+      environment: process.env.NODE_ENV,
+      isVercel: !!process.env.VERCEL,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "ERROR",
+      timestamp: new Date().toISOString(),
+      error: error.message,
+    });
+  }
 });
 
 // Error handling middleware
