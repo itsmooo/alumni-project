@@ -1,19 +1,24 @@
 // constants/api_config.dart
 class ApiConfig {
   // API Base URLs for different environments
-  static const String androidEmulatorUrl = 'http://10.0.2.2:5000/api';
-  static const String webDevelopmentUrl = 'http://127.0.0.1:5000/api';
-  static const String iosSimulatorUrl = 'http://localhost:5000/api';
-  static const String physicalDeviceUrl = 'http://10.1.1.33:5000/api';
+  static const String androidEmulatorUrl = 'https://alumni-backend-server.vercel.app/api';
+  static const String webDevelopmentUrl = 'https://alumni-backend-server.vercel.app/api';
+  static const String iosSimulatorUrl = 'https://alumni-backend-server.vercel.app/api';
+  static const String physicalDeviceUrl = 'https://alumni-backend-server.vercel.app/api';
   static const String vercelProductionUrl =
       'https://alumni-backend-server.vercel.app/api';
 
   // Updated with your actual IP
 
   // Current active base URL
-  // Change this based on your development environment
+  // Change this based on your development environment:
+  // - vercelProductionUrl: For production (deployed on Vercel)
+  // - physicalDeviceUrl: For local development with physical device
+  // - androidEmulatorUrl: For Android emulator
+  // - iosSimulatorUrl: For iOS simulator
+  // - webDevelopmentUrl: For web development
   static const String baseUrl =
-      physicalDeviceUrl; // Changed to use physical device URL for local development
+      vercelProductionUrl; // Using deployed Vercel backend for production
 
   // API Endpoints
   static const String authLogin = '/auth/login';
