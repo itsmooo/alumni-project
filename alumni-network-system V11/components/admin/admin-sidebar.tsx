@@ -14,10 +14,8 @@ import {
   Megaphone,
   Briefcase,
   Settings,
-  FileText,
   CreditCard,
   Shield,
-  HelpCircle,
   LogOut,
   Menu,
   Home,
@@ -128,18 +126,6 @@ const sidebarItems: SidebarItem[] = [
     href: "/admin/payments",
     icon: CreditCard,
     gradient: "from-emerald-500 to-teal-600",
-    children: [
-      {
-        title: "All Payments",
-        href: "/admin/payments",
-        icon: CreditCard,
-      },
-      {
-        title: "Financial Reports",
-        href: "/admin/payments/reports",
-        icon: FileText,
-      },
-    ],
   },
   {
     title: "Send Email",
@@ -325,14 +311,6 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
 
       {/* Enhanced Footer */}
       <div className="border-t border-slate-200 dark:border-slate-800 p-4 space-y-2 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="w-full justify-start h-10 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-        >
-          <HelpCircle className="mr-3 h-4 w-4" />
-          <span className="text-sm">Help & Support</span>
-        </Button>
         <Button 
           variant="ghost" 
           size="sm" 

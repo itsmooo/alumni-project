@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Calendar, MapPin, Users, Clock, DollarSign, Loader2 } from "lucide-react"
+import { Calendar, MapPin, Users, Clock, DollarSign, Loader2, Tag } from "lucide-react"
 import { format } from "date-fns"
 import type { Event } from "@/types"
 import type { RootState } from "@/lib/store"
@@ -134,6 +134,20 @@ export function EventCard({ event }: EventCardProps) {
               Organized by {event.organizer.firstName} {event.organizer.lastName}
             </span>
           </div>
+
+          {/* Event Tags */}
+          {event.tags && event.tags.length > 0 && (
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Tag className="mr-2 h-4 w-4" />
+              <div className="flex flex-wrap gap-1">
+                {event.tags.map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mt-4 pt-4 border-t">

@@ -47,9 +47,20 @@ const limiter = rateLimit({
   max: 100, // limit each IP to 100 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
-  // Trust the X-Forwarded-For header
+  // Trust the X-Forwarded-For header for Vercel
   skipSuccessfulRequests: false,
   skipFailedRequests: false,
+  // Custom key generator to handle Vercel proxy
+  keyGenerator: (req) => {
+    // Use X-Forwarded-For header if available (Vercel proxy)
+    return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip;
+  },
+  // Skip rate limiting for health checks and static assets
+  skip: (req) => {
+    return req.path === '/api/health' || 
+           req.path.startsWith('/api-docs') || 
+           req.path.startsWith('/static');
+  },
 });
 app.use(limiter);
 
@@ -105,27 +116,24 @@ app.use("/api/transactions", transactionRoutes);
 app.use("/api/communications", communicationRoutes);
 app.use("/api/emails", emailRoutes);
 
-// Health check endpoint
-app.get("/api/health", async (req, res) => {
-  try {
-    // Test database connection
-    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
-    
-    res.status(200).json({
-      status: "OK",
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      database: dbStatus,
-      databaseName: mongoose.connection.name,
-      databaseHost: mongoose.connection.host,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "ERROR",
-      timestamp: new Date().toISOString(),
-      error: error.message,
-    });
-  }
+// Health check endpoint for Vercel
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
+    uptime: process.uptime(),
+  });
+});
+
+// Root endpoint
+app.get("/", (req, res) => {
+  res.json({
+    message: "Alumni Network API",
+    version: "1.0.0",
+    status: "running",
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Error handling middleware

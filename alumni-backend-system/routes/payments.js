@@ -674,6 +674,27 @@ router.post("/hormuud", authenticateToken, async (req, res) => {
       });
     }
 
+    // Check if Hormuud environment variables are configured
+    const hormuudConfig = {
+      merchantUid: process.env.HORMUUD_MERCHANT_UID,
+      apiUserId: process.env.HORMUUD_API_USER_ID,
+      apiKey: process.env.HORMUUD_API_KEY,
+    };
+
+    // Check if any required config is missing
+    const missingConfig = Object.entries(hormuudConfig)
+      .filter(([key, value]) => !value)
+      .map(([key]) => key);
+
+    if (missingConfig.length > 0) {
+      console.error("Missing Hormuud configuration:", missingConfig);
+      return res.status(500).json({
+        success: false,
+        message: "Hormuud payment service is not configured. Please contact administrator.",
+        error: `Missing configuration: ${missingConfig.join(', ')}`
+      });
+    }
+
     const paymentData = {
       schemaVersion: "1.0",
       requestId: Date.now().toString(),
@@ -681,9 +702,9 @@ router.post("/hormuud", authenticateToken, async (req, res) => {
       channelName: "WEB",
       serviceName: "API_PURCHASE",
       serviceParams: {
-        merchantUid: process.env.HORMUUD_MERCHANT_UID,
-        apiUserId: process.env.HORMUUD_API_USER_ID,
-        apiKey: process.env.HORMUUD_API_KEY,
+        merchantUid: hormuudConfig.merchantUid,
+        apiUserId: hormuudConfig.apiUserId,
+        apiKey: hormuudConfig.apiKey,
         paymentMethod: "mwallet_account",
         payerInfo: {
           accountNo: phone,
@@ -698,12 +719,19 @@ router.post("/hormuud", authenticateToken, async (req, res) => {
       },
     };
 
-    console.log("Sending request to Hormuud API:", paymentData);
+    console.log("Sending request to Hormuud API:", {
+      ...paymentData,
+      serviceParams: {
+        ...paymentData.serviceParams,
+        apiKey: "***HIDDEN***" // Hide sensitive data in logs
+      }
+    });
 
     const response = await axios.post(HORMUUD_API_URL, paymentData, {
       headers: {
         "Content-Type": "application/json",
       },
+      timeout: 30000, // 30 second timeout
     });
 
     console.log("Hormuud API response:", response.data);
@@ -759,9 +787,31 @@ router.post("/hormuud", authenticateToken, async (req, res) => {
 
   } catch (error) {
     console.error("Hormuud payment error:", error);
+    
+    // Handle specific error types
+    if (error.code === 'ECONNABORTED') {
+      return res.status(408).json({
+        success: false,
+        message: "Payment request timed out. Please try again.",
+        error: "Request timeout"
+      });
+    }
+    
+    if (error.response) {
+      // API responded with error status
+      console.error("Hormuud API error response:", error.response.data);
+      return res.status(400).json({
+        success: false,
+        message: "Payment processing failed",
+        hormuudResponse: error.response.data,
+        error: error.response.data?.params?.description || error.response.data?.responseMsg || "API Error"
+      });
+    }
+    
     res.status(500).json({
-      error: "Payment processing failed",
-      details: error.response?.data || error.message,
+      success: false,
+      message: "Payment processing failed",
+      error: error.message || "Unknown error occurred"
     });
   }
 });
