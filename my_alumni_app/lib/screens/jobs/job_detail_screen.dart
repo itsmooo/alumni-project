@@ -698,7 +698,7 @@ class _JobApplicationFormState extends State<JobApplicationForm> {
     try {
       final token = await ApiService.getToken();
       final response = await http.post(
-        Uri.parse('http://localhost:5000/api/jobs/${widget.job.id}/apply'),
+        Uri.parse('${ApiService.baseUrl}/jobs/${widget.job.id}/apply'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

@@ -949,7 +949,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     try {
-      final uri = Uri.parse('http://localhost:5000/api/upload/single');
+      final uri = Uri.parse('${ApiService.baseUrl}/upload/single');
       final request = http.MultipartRequest('POST', uri);
       final token = await ApiService.getToken();
       request.headers['Authorization'] = 'Bearer $token';

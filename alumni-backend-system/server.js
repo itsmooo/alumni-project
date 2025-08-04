@@ -6,7 +6,7 @@ const compression = require("compression");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const { swaggerSpec, swaggerUi } = require("./swagger");
-const { connectToDatabase, ensureConnection } = require("./utils/database");
+const { connectDB } = require("./utils/connectDB");
 require("dotenv").config();
 
 // Import routes
@@ -30,7 +30,6 @@ const emailRoutes = require("./routes/emails");
 // Import middleware
 const errorHandler = require("./middleware/errorHandler");
 const { authenticateToken } = require("./middleware/auth");
-const { ensureDatabaseConnection } = require("./middleware/database");
 
 const app = express();
 
@@ -79,32 +78,37 @@ app.use(
 );
 
 // Database connection
-connectToDatabase()
-  .catch((err) => console.error("Database connection failed:", err));
+connectDB()
+  .then(() => {
+    console.log('Database connection established successfully');
+  })
+  .catch((err) => {
+    console.error("Database connection failed:", err);
+    // Don't exit the process, let it continue and retry on requests
+  });
 
-// Routes with database connection middleware for critical endpoints
-app.use("/api/auth", ensureDatabaseConnection, authRoutes);
-app.use("/api/users", ensureDatabaseConnection, userRoutes);
-app.use("/api/events", ensureDatabaseConnection, eventRoutes);
-app.use("/api/announcements", ensureDatabaseConnection, announcementRoutes);
-app.use("/api/payments", ensureDatabaseConnection, paymentRoutes);
-app.use("/api/jobs", ensureDatabaseConnection, jobRoutes);
+// Routes (removed ensureDatabaseConnection middleware since connectDB handles it)
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/announcements", announcementRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/jobs", jobRoutes);
 // app.use("/api/messages", messageRoutes)
-app.use("/api/dashboard", ensureDatabaseConnection, dashboardRoutes);
-app.use("/api/system", ensureDatabaseConnection, systemRoutes);
-app.use("/api/upload", ensureDatabaseConnection, uploadRoutes);
-app.use("/api/alumni", ensureDatabaseConnection, alumniRoutes);
-app.use("/api/donations", ensureDatabaseConnection, donationRoutes);
-app.use("/api/notifications", ensureDatabaseConnection, notificationRoutes);
-app.use("/api/transactions", ensureDatabaseConnection, transactionRoutes);
-app.use("/api/communications", ensureDatabaseConnection, communicationRoutes);
-app.use("/api/emails", ensureDatabaseConnection, emailRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/system", systemRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use("/api/alumni", alumniRoutes);
+app.use("/api/donations", donationRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/transactions", transactionRoutes);
+app.use("/api/communications", communicationRoutes);
+app.use("/api/emails", emailRoutes);
 
 // Health check endpoint
 app.get("/api/health", async (req, res) => {
   try {
     // Test database connection
-    await ensureConnection();
     const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
     
     res.status(200).json({
@@ -112,6 +116,8 @@ app.get("/api/health", async (req, res) => {
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       database: dbStatus,
+      databaseName: mongoose.connection.name,
+      databaseHost: mongoose.connection.host,
     });
   } catch (error) {
     res.status(500).json({
@@ -132,13 +138,15 @@ app.use("*", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Only start server if not in Vercel environment
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
-  const server = app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+// Start server in all environments
+const server = app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Vercel: ${process.env.VERCEL ? 'Yes' : 'No'}`);
+});
 
-  // Socket.io setup for real-time messaging (only in development)
+// Socket.io setup for real-time messaging (only in development)
+if (process.env.NODE_ENV !== 'production') {
   const io = require("socket.io")(server, {
     cors: {
       origin: process.env.FRONTEND_URL || "http://localhost:3000",
