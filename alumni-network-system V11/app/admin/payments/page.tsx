@@ -31,6 +31,7 @@ import {
   XCircle
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useGetAdminPaymentsQuery } from '@/lib/api/adminApi';
 
 interface Payment {
   _id: string;
@@ -233,8 +234,6 @@ function PaymentDetailsModal({ payment, isOpen, onClose }: {
 
 function AdminPaymentsContent() {
   const [payments, setPayments] = useState<Payment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pagination, setPagination] = useState({
@@ -252,57 +251,29 @@ function AdminPaymentsContent() {
     search: '',
   });
 
+  const { data, isLoading, error: apiError, refetch } = useGetAdminPaymentsQuery({
+    page: pagination.page,
+    limit: pagination.limit,
+    status: filters.status !== 'all' ? filters.status : undefined,
+    type: filters.type !== 'all' ? filters.type : undefined,
+    paymentMethod: filters.paymentMethod !== 'all' ? filters.paymentMethod : undefined,
+    search: filters.search || undefined,
+  });
+
   useEffect(() => {
-    fetchPayments();
-  }, [pagination.page, filters]);
-
-  const fetchPayments = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const queryParams = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-        ...(filters.status !== 'all' && { status: filters.status }),
-        ...(filters.type !== 'all' && { type: filters.type }),
-        ...(filters.paymentMethod !== 'all' && { paymentMethod: filters.paymentMethod }),
-        ...(filters.search && { search: filters.search }),
-      });
-
-      console.log('Fetching payments from:', `/api/admin/payments?${queryParams}`);
-
-      const response = await fetch(`/api/admin/payments?${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to fetch payments: ${response.status} ${errorText}`);
-      }
-
-      const data: PaymentsResponse = await response.json();
-      console.log('Received data:', data);
-      
-      setPayments(data.payments);
+    if (data) {
+      setPayments(data.data || []);
       setPagination(prev => ({
         ...prev,
-        total: data.pagination.total,
-        pages: data.pagination.pages,
+        total: data.total,
+        pages: data.totalPages,
       }));
-    } catch (err) {
-      console.error('Fetch error:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [data]);
+
+  useEffect(() => {
+    refetch();
+  }, [pagination.page, filters, refetch]);
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -403,7 +374,7 @@ function AdminPaymentsContent() {
     setSelectedPayment(null);
   };
 
-  if (error) {
+  if (apiError) {
     return (
       <div className="flex h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <AdminSidebar />
@@ -418,7 +389,7 @@ function AdminPaymentsContent() {
                     variant="outline"
                     size="sm"
                     className="ml-4 border-red-200 hover:bg-red-100"
-                    onClick={() => fetchPayments()}
+                    onClick={() => refetch()}
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Retry
@@ -432,7 +403,7 @@ function AdminPaymentsContent() {
     );
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <AdminSidebar />
@@ -590,9 +561,9 @@ function AdminPaymentsContent() {
                 <CardTitle>Payment Transactions</CardTitle>
               </CardHeader>
               <CardContent>
-                {error && (
+                {apiError && (
                   <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-                    <p className="text-red-800">{error}</p>
+                    <p className="text-red-800">Failed to load payments data. Please check your backend connection.</p>
                   </div>
                 )}
 
@@ -692,7 +663,7 @@ function AdminPaymentsContent() {
                   </Table>
                 </div>
 
-                {payments.length === 0 && !loading && (
+                {payments.length === 0 && !isLoading && (
                   <div className="text-center py-8">
                     <p className="text-gray-500">No payments found</p>
                   </div>

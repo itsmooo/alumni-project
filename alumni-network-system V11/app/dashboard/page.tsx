@@ -126,79 +126,79 @@ function DashboardContent() {
                 </TabsTrigger>
               </TabsList>
 
-                             <TabsContent value="overview" className="space-y-8">
-                 <div className="grid gap-8 md:grid-cols-2">
-                   <Card className="border-0 shadow-lg bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
-                     <CardHeader>
-                       <CardTitle>Recent Activity</CardTitle>
-                       <CardDescription>Your latest interactions</CardDescription>
-                     </CardHeader>
-                     <CardContent className="space-y-4">
-                       <div className="flex items-center space-x-4">
-                         <Avatar className="h-8 w-8">
-                           <AvatarFallback>JD</AvatarFallback>
-                         </Avatar>
-                         <div className="flex-1 space-y-1">
-                           <p className="text-sm font-medium">John Doe connected with you</p>
-                           <p className="text-xs text-muted-foreground">2 hours ago</p>
-                         </div>
-                       </div>
-                       <div className="flex items-center space-x-4">
-                         <Avatar className="h-8 w-8">
-                           <AvatarFallback>SM</AvatarFallback>
-                         </Avatar>
-                         <div className="flex-1 space-y-1">
-                           <p className="text-sm font-medium">Sarah Miller liked your post</p>
-                           <p className="text-xs text-muted-foreground">4 hours ago</p>
-                         </div>
-                       </div>
-                       <div className="flex items-center space-x-4">
-                         <Avatar className="h-8 w-8">
-                           <AvatarFallback>MB</AvatarFallback>
-                         </Avatar>
-                         <div className="flex-1 space-y-1">
-                           <p className="text-sm font-medium">Mike Brown registered for Tech Meetup</p>
-                           <p className="text-xs text-muted-foreground">1 day ago</p>
-                         </div>
-                       </div>
-                     </CardContent>
-                   </Card>
+              <TabsContent value="overview" className="space-y-8">
+                <div className="grid gap-8 md:grid-cols-2">
+                  <Card className="border-0 shadow-lg bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle>Recent Activity</CardTitle>
+                      <CardDescription>Your latest interactions</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center space-x-4">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>JD</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 space-y-1">
+                          <p className="text-sm font-medium">John Doe connected with you</p>
+                          <p className="text-xs text-muted-foreground">2 hours ago</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>SM</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 space-y-1">
+                          <p className="text-sm font-medium">Sarah Miller liked your post</p>
+                          <p className="text-xs text-muted-foreground">4 hours ago</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>MB</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 space-y-1">
+                          <p className="text-sm font-medium">Mike Brown registered for Tech Meetup</p>
+                          <p className="text-xs text-muted-foreground">1 day ago</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                                       <UserNotifications />
-                 </div>
-                 
-                 <Card className="border-0 shadow-lg bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
-                   <CardHeader>
-                     <CardTitle>Upcoming Events</CardTitle>
-                     <CardDescription>Events you might be interested in</CardDescription>
-                   </CardHeader>
-                   <CardContent className="space-y-4">
-                     <div className="space-y-2">
-                       <div className="flex items-center justify-between">
-                         <div>
-                           <p className="text-sm font-medium">Alumni Tech Meetup</p>
-                           <p className="text-xs text-muted-foreground">Dec 25, 2024 • 6:00 PM</p>
-                         </div>
-                         <Badge>Attending</Badge>
-                       </div>
-                       <div className="flex items-center justify-between">
-                         <div>
-                           <p className="text-sm font-medium">Career Fair 2025</p>
-                           <p className="text-xs text-muted-foreground">Jan 15, 2025 • 10:00 AM</p>
-                         </div>
-                         <Button variant="outline" size="sm">Register</Button>
-                       </div>
-                       <div className="flex items-center justify-between">
-                         <div>
-                           <p className="text-sm font-medium">Annual Gala</p>
-                           <p className="text-xs text-muted-foreground">Feb 14, 2025 • 7:00 PM</p>
-                         </div>
-                         <Button variant="outline" size="sm">Register</Button>
-                       </div>
-                     </div>
-                   </CardContent>
-                 </Card>
-               </TabsContent>
+                  <UserNotifications />
+                </div>
+                
+                <Card className="border-0 shadow-lg bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle>Upcoming Events</CardTitle>
+                    <CardDescription>Events you might be interested in</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">Alumni Tech Meetup</p>
+                          <p className="text-xs text-muted-foreground">Dec 25, 2024 • 6:00 PM</p>
+                        </div>
+                        <Badge>Attending</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">Career Fair 2025</p>
+                          <p className="text-xs text-muted-foreground">Jan 15, 2025 • 10:00 AM</p>
+                        </div>
+                        <Button variant="outline" size="sm">Register</Button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">Annual Gala</p>
+                          <p className="text-xs text-muted-foreground">Feb 14, 2025 • 7:00 PM</p>
+                        </div>
+                        <Button variant="outline" size="sm">Register</Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
               <TabsContent value="events">
                 <Card className="border-0 shadow-lg bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
@@ -239,6 +239,7 @@ function DashboardContent() {
           </div>
         </div>
       </div>
+    </div>
   )
 }
 

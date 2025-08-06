@@ -98,6 +98,23 @@ router.get("/", authenticateToken, requireRole(["admin"]), async (req, res) => {
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ])
 
+    // Additional payment statistics
+    const totalPayments = await Payment.countDocuments({ status: "completed" })
+    const recentPayments = await Payment.countDocuments({
+      status: "completed",
+      ...dateFilter,
+    })
+
+    const paymentsByMethod = await Payment.aggregate([
+      { $match: { status: "completed" } },
+      { $group: { _id: "$paymentMethod", count: { $sum: 1 }, total: { $sum: "$amount" } } },
+    ])
+
+    const paymentsByType = await Payment.aggregate([
+      { $match: { status: "completed" } },
+      { $group: { _id: "$type", count: { $sum: 1 }, total: { $sum: "$amount" } } },
+    ])
+
     // Announcement statistics
     const totalAnnouncements = await Announcement.countDocuments({ status: "published" })
     const announcementsByCategory = await Announcement.aggregate([
@@ -146,6 +163,16 @@ router.get("/", authenticateToken, requireRole(["admin"]), async (req, res) => {
       payments: {
         totalRevenue: totalRevenue[0]?.total || 0,
         recentRevenue: recentRevenue[0]?.total || 0,
+        totalPayments: totalPayments,
+        recentPayments: recentPayments,
+        byMethod: paymentsByMethod.reduce((acc, item) => {
+          acc[item._id] = { count: item.count, total: item.total }
+          return acc
+        }, {}),
+        byType: paymentsByType.reduce((acc, item) => {
+          acc[item._id] = { count: item.count, total: item.total }
+          return acc
+        }, {}),
       },
       announcements: {
         total: totalAnnouncements,

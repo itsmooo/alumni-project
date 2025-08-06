@@ -26,12 +26,12 @@ export function UserNotifications({ className }: UserNotificationsProps) {
   const [markAllAsRead] = useMarkAllNotificationsAsReadMutation()
 
   const notifications = notificationsData?.notifications || []
-  const unreadNotifications = notifications.filter(n => n.status !== "read")
+  const unreadNotifications = notifications.filter(n => String(n.status) !== "read")
   const displayNotifications = showAll ? notifications : notifications.slice(0, 5)
 
   const handleMarkAsRead = async (id: string) => {
     try {
-      await markAsRead(id).unwrap()
+      await markAsRead(String(id)).unwrap()
     } catch (error) {
       console.error("Failed to mark notification as read:", error)
     }
@@ -56,7 +56,7 @@ export function UserNotifications({ className }: UserNotificationsProps) {
       case "job":
         return <Badge className="bg-green-100 text-green-800 text-xs">Job</Badge>
       default:
-        return <Badge variant="secondary" className="text-xs">{type}</Badge>
+        return <Badge variant="secondary" className="text-xs">{String(type)}</Badge>
     }
   }
 
@@ -186,41 +186,41 @@ export function UserNotifications({ className }: UserNotificationsProps) {
         <div className="space-y-3">
           {displayNotifications.map((notification) => (
             <div
-                             key={notification._id}
-                           className={`p-3 rounded-lg border transition-colors ${
-               notification.status === "read"
-                 ? "border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50"
-                 : "border-blue-200 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-900/20"
-             }`}
+              key={String(notification._id || notification.id || Math.random())}
+              className={`p-3 rounded-lg border transition-colors ${
+                String(notification.status) === "read"
+                  ? "border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50"
+                  : "border-blue-200 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-900/20"
+              }`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 space-y-2">
                                      <div className="flex items-center gap-2">
                      <h4 className={`font-medium text-sm ${
-                       notification.status === "read" ? "text-slate-600 dark:text-slate-400" : "text-slate-900 dark:text-white"
+                       String(notification.status) === "read" ? "text-slate-600 dark:text-slate-400" : "text-slate-900 dark:text-white"
                      }`}>
-                       {notification.subject}
+                       {typeof notification.subject === 'string' ? notification.subject : String(notification.subject || '')}
                      </h4>
-                     {getTypeBadge(notification.type)}
-                     {notification.status !== "read" && (
+                     {getTypeBadge(String(notification.type || ''))}
+                     {String(notification.status) !== "read" && (
                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                      )}
                    </div>
                   <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
-                    {notification.content}
+                    {typeof notification.content === 'string' ? notification.content : String(notification.content || '')}
                   </p>
                   <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                     <span>{formatDate(notification.createdAt)}</span>
                     {notification.sender && (
-                      <span>From: {notification.sender.firstName} {notification.sender.lastName}</span>
+                      <span>From: {typeof notification.sender === 'object' ? `${notification.sender.firstName || ''} ${notification.sender.lastName || ''}`.trim() : notification.sender}</span>
                     )}
                   </div>
                 </div>
-                                 {notification.status !== "read" && (
+                                 {String(notification.status) !== "read" && (
                    <Button
                      variant="ghost"
                      size="sm"
-                     onClick={() => handleMarkAsRead(notification._id)}
+                     onClick={() => handleMarkAsRead(String(notification._id || notification.id || ''))}
                      className="h-6 w-6 p-0"
                    >
                      <Check className="h-3 w-3" />

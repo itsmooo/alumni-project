@@ -505,6 +505,36 @@ export const adminApi = api.injectEndpoints({
       providesTags: ["Admin"],
     }),
 
+    // Payments Management
+    getAdminPayments: builder.query<
+      PaginatedResponse<any>,
+      {
+        page?: number
+        limit?: number
+        status?: string
+        type?: string
+        paymentMethod?: string
+        search?: string
+      }
+    >({
+      query: (params) => ({
+        url: "/payments/admin/payments",
+        params: {
+          page: params.page || 1,
+          limit: params.limit || 20,
+          ...params,
+        },
+      }),
+      transformResponse: (response: any) => ({
+        data: response.payments || [],
+        total: response.pagination.total,
+        page: response.pagination.page,
+        limit: response.pagination.limit,
+        totalPages: response.pagination.pages,
+      }),
+      providesTags: ["Payment", "Admin"],
+    }),
+
     // Bulk Communication - placeholder for future implementation
     sendBulkNotification: builder.mutation<
       { success: boolean; sent: number },
@@ -548,5 +578,6 @@ export const {
   useGetGraduationYearsQuery,
   useGetLocationsQuery,
   useGetSystemLogsQuery,
+  useGetAdminPaymentsQuery,
   useSendBulkNotificationMutation,
 } = adminApi

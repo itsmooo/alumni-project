@@ -597,6 +597,59 @@ router.get("/admin/all", authenticateToken, requireRole(["admin"]), async (req, 
   }
 })
 
+// Admin: Get all payments (alternative route for frontend compatibility)
+router.get("/admin/payments", authenticateToken, requireRole(["admin"]), async (req, res) => {
+  try {
+    const page = Number.parseInt(req.query.page) || 1
+    const limit = Number.parseInt(req.query.limit) || 50
+    const skip = (page - 1) * limit
+
+    const filter = {}
+    if (req.query.status && req.query.status !== 'all') {
+      filter.status = req.query.status
+    }
+    if (req.query.type && req.query.type !== 'all') {
+      filter.type = req.query.type
+    }
+    if (req.query.paymentMethod && req.query.paymentMethod !== 'all') {
+      filter.paymentMethod = req.query.paymentMethod
+    }
+    if (req.query.search) {
+      filter.$or = [
+        { purpose: { $regex: req.query.search, $options: 'i' } },
+        { 'user.firstName': { $regex: req.query.search, $options: 'i' } },
+        { 'user.lastName': { $regex: req.query.search, $options: 'i' } },
+        { 'user.email': { $regex: req.query.search, $options: 'i' } },
+      ]
+    }
+
+    console.log('Admin payments filter:', filter);
+
+    const payments = await Payment.find(filter)
+      .populate("user", "firstName lastName email")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+
+    const total = await Payment.countDocuments(filter)
+
+    console.log(`Found ${payments.length} payments out of ${total} total`);
+
+    res.json({
+      payments,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    })
+  } catch (error) {
+    console.error("Admin get payments error:", error)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
 // Admin: Payment analytics
 router.get("/admin/analytics", authenticateToken, requireRole(["admin"]), async (req, res) => {
   try {
@@ -755,7 +808,7 @@ router.post("/hormuud", authenticateToken, async (req, res) => {
         phoneNumber: phone,
         transactionId: hormuudResponse.requestId || hormuudResponse.transactionId,
       },
-      status: isSuccess ? "processing" : "failed",
+      status: isSuccess ? "completed" : "failed", // Changed from "processing" to "completed" for successful payments
       receipt: {
         receiptNumber: `HORMUUD_${Date.now()}`,
         issuedAt: new Date(),
@@ -765,6 +818,7 @@ router.post("/hormuud", authenticateToken, async (req, res) => {
         ipAddress: req.ip,
         userAgent: req.get("User-Agent"),
       },
+      processedAt: isSuccess ? new Date() : null, // Add processedAt for completed payments
     });
 
     await payment.save();
@@ -781,7 +835,7 @@ router.post("/hormuud", authenticateToken, async (req, res) => {
       success: true,
       paymentId: payment._id,
       requestId: hormuudResponse.requestId || hormuudResponse.transactionId,
-      message: "Payment initiated successfully",
+      message: "Payment completed successfully", // Updated message
       hormuudResponse,
     });
 
