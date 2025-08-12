@@ -1,5 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../services/api_service.dart';
+import '../providers/jobs_provider.dart';
 
 class ApiTest {
   static const String baseUrl =
@@ -520,5 +522,30 @@ class ApiTest {
       print('3. Network connectivity issues');
       print('4. Authentication failed');
     }
+  }
+}
+
+// Test the new efficient job application status functionality
+Future<void> testEfficientJobApplicationStatus() async {
+  try {
+    print('=== TESTING EFFICIENT JOB APPLICATION STATUS ===');
+
+    // Test 1: Get user's applied jobs directly
+    print('\n1. Testing getUserAppliedJobIds...');
+    await ApiService.testGetUserAppliedJobIds();
+
+    // Test 2: Test JobsProvider efficient sync
+    print('\n2. Testing JobsProvider efficient sync...');
+    final provider = JobsProvider();
+    await provider.initialize();
+
+    // Test with some sample job IDs
+    final sampleJobIds = ['job1', 'job2', 'job3'];
+    print('Testing efficient sync with sample job IDs: $sampleJobIds');
+    await provider.syncApplicationStatusesForJobs(sampleJobIds);
+
+    print('✅ Efficient job application status test completed!');
+  } catch (e) {
+    print('❌ Efficient job application status test failed: $e');
   }
 }

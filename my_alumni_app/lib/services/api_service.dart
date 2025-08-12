@@ -901,6 +901,37 @@ class ApiService {
     }
   }
 
+  // Get all jobs that the current user has applied for
+  static Future<List<String>> getUserAppliedJobIds() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/users/applied-jobs'),
+        headers: await _getHeaders(),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        // Return list of job IDs that user has applied for
+        final List<dynamic> appliedJobs = data['appliedJobs'] ?? [];
+        return appliedJobs
+            .map((job) => job['jobId'] ?? job['id'])
+            .cast<String>()
+            .toList();
+      } else if (response.statusCode == 404) {
+        // User hasn't applied for any jobs yet
+        return [];
+      } else {
+        throw Exception(data['message'] ?? 'Failed to get user applied jobs');
+      }
+    } catch (e) {
+      if (e is Exception) {
+        rethrow;
+      }
+      throw Exception('Network error: $e');
+    }
+  }
+
   // Test connection to the API
   static Future<bool> testConnection() async {
     try {
@@ -912,6 +943,20 @@ class ApiService {
       return response.statusCode == 200;
     } catch (e) {
       return false;
+    }
+  }
+
+  // Test the new getUserAppliedJobIds endpoint
+  static Future<void> testGetUserAppliedJobIds() async {
+    try {
+      print('=== TESTING GET USER APPLIED JOBS ===');
+
+      final appliedJobIds = await getUserAppliedJobIds();
+      print('✅ getUserAppliedJobIds test successful!');
+      print(
+          'User has applied for ${appliedJobIds.length} jobs: $appliedJobIds');
+    } catch (e) {
+      print('❌ getUserAppliedJobIds test failed: $e');
     }
   }
 }

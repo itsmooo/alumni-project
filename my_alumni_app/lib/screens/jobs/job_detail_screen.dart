@@ -26,16 +26,58 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _checkIfApplied();
+    // Use a post-frame callback to ensure the provider is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkIfApplied();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Listen to provider changes to update UI immediately
+    final provider = context.read<JobsProvider>();
+    final currentStatus = provider.hasAppliedForJob(widget.job.id);
+    if (currentStatus != _hasApplied) {
+      setState(() {
+        _hasApplied = currentStatus;
+        _loadingStatus = false;
+      });
+    }
   }
 
   Future<void> _checkIfApplied() async {
     try {
-      final applied = await ApiService.hasAppliedForJob(widget.job.id);
+      // First check if we have the status cached in the provider
+      final provider = context.read<JobsProvider>();
+
+      // Wait for provider to be initialized if needed
+      if (!provider.isInitialized) {
+        print('Provider not initialized yet, waiting...');
+        // Wait a bit for initialization
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (!provider.isInitialized) {
+          print('Provider still not initialized, proceeding anyway...');
+        }
+      }
+
+      // Use synchronous method for immediate response from cache
+      final cachedStatus = provider.getApplicationStatusSync(widget.job.id);
+
       setState(() {
-        _hasApplied = applied;
+        _hasApplied = cachedStatus;
         _loadingStatus = false;
       });
+
+      // If we have cached status, show it immediately and update in background
+      if (cachedStatus) {
+        print('Using cached status for job ${widget.job.id}: $cachedStatus');
+        // Update in background to ensure sync with API
+        _updateStatusInBackground(provider);
+      } else {
+        // No cached status, check API immediately
+        await _checkAPIAndUpdateStatus(provider);
+      }
     } catch (e) {
       print('Error checking application status: $e');
       setState(() {
@@ -45,12 +87,134 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     }
   }
 
+  // Update status in background without blocking UI
+  Future<void> _updateStatusInBackground(JobsProvider provider) async {
+    try {
+      // Use efficient sync instead of individual job check
+      await provider.syncApplicationStatusesForJobs([widget.job.id]);
+
+      if (mounted) {
+        final newStatus = provider.getApplicationStatusSync(widget.job.id);
+        if (newStatus != _hasApplied) {
+          setState(() {
+            _hasApplied = newStatus;
+          });
+          print(
+              'Background update completed for job ${widget.job.id}: $newStatus');
+        }
+      }
+    } catch (e) {
+      print('Background update failed for job ${widget.job.id}: $e');
+    }
+  }
+
+  // Check API and update status
+  Future<void> _checkAPIAndUpdateStatus(JobsProvider provider) async {
+    try {
+      print('Checking API for job ${widget.job.id} to ensure sync...');
+
+      // Use efficient sync instead of individual job check
+      await provider.syncApplicationStatusesForJobs([widget.job.id]);
+
+      final newStatus = provider.getApplicationStatusSync(widget.job.id);
+      print('Efficient sync returned: $newStatus for job ${widget.job.id}');
+
+      if (mounted) {
+        setState(() {
+          _hasApplied = newStatus;
+        });
+
+        print('Updated UI for job ${widget.job.id}: $newStatus');
+      }
+    } catch (e) {
+      print('Error checking application status from API: $e');
+      // Keep the cached status if API fails, but log the error
+      if (e.toString().contains('Already applied')) {
+        print(
+            'API indicates user has already applied, updating local state...');
+        setState(() {
+          _hasApplied = true;
+        });
+        provider.setApplicationStatus(widget.job.id, true);
+      }
+    }
+  }
+
+  // Retry checking application status if needed
+  Future<void> _retryCheckApplicationStatus() async {
+    setState(() {
+      _loadingStatus = true;
+    });
+    await _checkIfApplied();
+  }
+
+  // Force sync current job's application status with API
+  Future<void> _forceSyncCurrentJobStatus() async {
+    try {
+      setState(() {
+        _loadingStatus = true;
+      });
+
+      final provider = context.read<JobsProvider>();
+      print('Force syncing application status for job ${widget.job.id}...');
+
+      // Use efficient sync instead of individual refresh
+      await provider.syncApplicationStatusesForJobs([widget.job.id]);
+
+      // Update local state
+      final newStatus = provider.getApplicationStatusSync(widget.job.id);
+      setState(() {
+        _hasApplied = newStatus;
+        _loadingStatus = false;
+      });
+
+      print('Force sync completed. New status: $newStatus');
+
+      // Show feedback to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Status refreshed: ${newStatus ? "Applied" : "Not Applied"}'),
+            backgroundColor: newStatus ? Colors.green : Colors.blue,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error force syncing job status: $e');
+      setState(() {
+        _loadingStatus = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error refreshing status: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Job Details'),
         actions: [
+          // Add sync button to force sync with API
+          IconButton(
+            icon: const Icon(Icons.sync),
+            onPressed: _forceSyncCurrentJobStatus,
+            tooltip: 'Force sync with API',
+          ),
+          // Add refresh button to manually check application status
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _retryCheckApplicationStatus,
+            tooltip: 'Refresh application status',
+          ),
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: _shareJob,
@@ -642,6 +806,17 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   .read<JobsProvider>()
                   .setApplicationStatus(widget.job.id, true);
             },
+            onAlreadyApplied: () {
+              // Handle the case where the API says "Already applied" but local state doesn't know
+              print('API indicates already applied, updating local state...');
+              setState(() {
+                _hasApplied = true;
+              });
+              // Force sync with the provider
+              context
+                  .read<JobsProvider>()
+                  .setApplicationStatus(widget.job.id, true);
+            },
           ),
         ),
       );
@@ -656,8 +831,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 class JobApplicationForm extends StatefulWidget {
   final Job job;
   final VoidCallback? onApplicationSuccess;
+  final VoidCallback? onAlreadyApplied;
   const JobApplicationForm(
-      {Key? key, required this.job, this.onApplicationSuccess})
+      {Key? key,
+      required this.job,
+      this.onApplicationSuccess,
+      this.onAlreadyApplied})
       : super(key: key);
 
   @override
@@ -722,7 +901,7 @@ class _JobApplicationFormState extends State<JobApplicationForm> {
           const SnackBar(
               content: Text('Already applied'), backgroundColor: Colors.orange),
         );
-        widget.onApplicationSuccess?.call();
+        widget.onAlreadyApplied?.call();
       } else {
         throw Exception(data['message'] ?? 'Failed to apply');
       }

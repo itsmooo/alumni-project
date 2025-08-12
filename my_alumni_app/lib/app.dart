@@ -18,7 +18,14 @@ class AlumniNetworkApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => AnnouncementsProvider()),
-        ChangeNotifierProvider(create: (_) => JobsProvider()),
+        ChangeNotifierProvider(
+          create: (context) {
+            final provider = JobsProvider();
+            // Initialize the provider to load stored application status
+            provider.initialize();
+            return provider;
+          },
+        ),
         ChangeNotifierProvider(create: (_) => EventsProvider()),
         ChangeNotifierProvider(create: (_) => PaymentsProvider()),
       ],

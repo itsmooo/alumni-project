@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../providers/jobs_provider.dart';
 import '../../models/job.dart';
-import '../../utils/api_test.dart';
 import 'job_card.dart';
 import 'job_detail_screen.dart';
 
@@ -15,7 +14,8 @@ class JobsListScreen extends StatefulWidget {
   State<JobsListScreen> createState() => _JobsListScreenState();
 }
 
-class _JobsListScreenState extends State<JobsListScreen> {
+class _JobsListScreenState extends State<JobsListScreen>
+    with WidgetsBindingObserver {
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
   final TextEditingController _searchController = TextEditingController();
@@ -28,38 +28,83 @@ class _JobsListScreenState extends State<JobsListScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<JobsProvider>().loadJobs(refresh: true);
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      print('=== JOBS LIST SCREEN INITIALIZING - EFFICIENT MODE ===');
+
+      final provider = context.read<JobsProvider>();
+
+      // Wait for provider to be initialized
+      if (!provider.isInitialized) {
+        print('Waiting for provider to initialize...');
+        await provider.initialize();
+      }
+
+      print('Provider initialized: ${provider.isInitialized}');
+
+      // Load jobs first
+      await provider.loadJobs(refresh: true);
+      print('Jobs loaded: ${provider.jobs.length}');
+
+      if (provider.jobs.isNotEmpty) {
+        final jobIds = provider.jobs.map((job) => job.id).toList();
+        print('Job IDs loaded: $jobIds');
+
+        // EFFICIENT APPROACH: Sync all application statuses in one API call
+        print('Starting efficient sync...');
+        await provider.syncApplicationStatusesForJobs(jobIds);
+        print('Efficient sync completed');
+
+        // Force another UI update
+        setState(() {});
+
+        print('=== INITIALIZATION COMPLETED ===');
+      }
     });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _refreshController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // Refresh user's applied jobs when app becomes visible
+      _refreshUserAppliedJobs();
+    }
+  }
+
+  // Refresh user's applied jobs when navigating to this screen
+  Future<void> _refreshUserAppliedJobs() async {
+    try {
+      final provider = context.read<JobsProvider>();
+      if (provider.isInitialized) {
+        print('Refreshing user applied jobs on screen focus...');
+        await provider.refreshUserAppliedJobs();
+      }
+    } catch (e) {
+      print('Error refreshing user applied jobs: $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Job Opportunities'),
-      //   actions: [
-      //     IconButton(
-      //       icon: const Icon(Icons.filter_list),
-      //       onPressed: _showFilterDialog,
-      //     ),
-      //     IconButton(
-      //       icon: const Icon(Icons.bug_report),
-      //       onPressed: _testApiConnection,
-      //     ),
-      //     IconButton(
-      //       icon: const Icon(Icons.wifi),
-      //       onPressed: _testConnection,
-      //     ),
-      //   ],
-      // ),
+      appBar: AppBar(
+        title: const Text('Job Opportunities'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: _showFilterDialog,
+          ),
+        ],
+      ),
       body: Column(
         children: [
           // Search bar
@@ -243,7 +288,7 @@ class _JobsListScreenState extends State<JobsListScreen> {
                       return JobCard(
                         job: job,
                         onTap: () => _navigateToDetail(job),
-                        hasApplied: provider.hasAppliedForJob(job.id),
+                        hasApplied: provider.getApplicationStatusSync(job.id),
                       );
                     },
                   ),
@@ -443,69 +488,26 @@ class _JobsListScreenState extends State<JobsListScreen> {
   Future<void> _onRefresh() async {
     final provider = context.read<JobsProvider>();
     await provider.loadJobs(refresh: true);
+
+    // Use efficient sync after refresh
+    if (provider.jobs.isNotEmpty) {
+      final jobIds = provider.jobs.map((job) => job.id).toList();
+      await provider.syncApplicationStatusesForJobs(jobIds);
+    }
+
     _refreshController.refreshCompleted();
   }
 
   Future<void> _onLoading() async {
     final provider = context.read<JobsProvider>();
     await provider.loadJobs();
+
+    // Use efficient sync after loading more jobs
+    if (provider.jobs.isNotEmpty) {
+      final jobIds = provider.jobs.map((job) => job.id).toList();
+      await provider.syncApplicationStatusesForJobs(jobIds);
+    }
+
     _refreshController.loadComplete();
-  }
-
-  Future<void> _testApiConnection() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Testing API connection...')),
-    );
-
-    try {
-      await ApiTest.testJobsEndpoints();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('API test completed! Check console for details.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('API test failed: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _testConnection() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Testing connection to backend...')),
-    );
-
-    try {
-      await ApiTest.testJobsConnection();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content:
-                Text('Connection test completed! Check console for details.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Connection test failed: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 }
