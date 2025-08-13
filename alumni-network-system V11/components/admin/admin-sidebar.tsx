@@ -98,7 +98,7 @@ const sidebarItems: SidebarItem[] = [
       },
       {
         title: "Create Announcement",
-        href: "/admin/announcements/create",
+        href: "/admin/announcements?create=1",
         icon: Megaphone,
       },
     ],

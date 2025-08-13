@@ -387,11 +387,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ],
                   ),
-                  child: TextFormField(
-                    controller: _graduationYearController,
+                  child: DropdownButtonFormField<int>(
+                    value: _graduationYearController.text.isNotEmpty
+                        ? int.tryParse(_graduationYearController.text)
+                        : null,
                     decoration: InputDecoration(
                       labelText: 'Graduation Year',
-                      hintText: 'Enter your graduation year',
+                      hintText: 'Select your graduation year',
                       prefixIcon: Container(
                         margin: const EdgeInsets.all(12),
                         padding: const EdgeInsets.all(8),
@@ -423,19 +425,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         color: AppColors.textSecondary.withOpacity(0.6),
                       ),
                     ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your graduation year';
+                    items: _generateYearItems(),
+                    onChanged: (int? value) {
+                      if (value != null) {
+                        _graduationYearController.text = value.toString();
                       }
-                      final year = int.tryParse(value);
-                      if (year == null ||
-                          year < 1950 ||
-                          year > DateTime.now().year + 5) {
-                        return 'Please enter a valid graduation year';
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Please select your graduation year';
+                      }
+                      if (value < 1950 || value > DateTime.now().year + 5) {
+                        return 'Please select a valid graduation year';
                       }
                       return null;
                     },
+                    dropdownColor: Colors.white,
+                    icon: Icon(
+                      Icons.keyboard_arrow_down,
+                      color: AppColors.primary,
+                    ),
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
 
@@ -897,6 +910,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
       }
     }
+  }
+
+  // Generate list of years for dropdown (1950 to current year + 5)
+  List<DropdownMenuItem<int>> _generateYearItems() {
+    final currentYear = DateTime.now().year;
+    final List<DropdownMenuItem<int>> items = [];
+
+    for (int year = currentYear + 5; year >= 1950; year--) {
+      items.add(
+        DropdownMenuItem<int>(
+          value: year,
+          child: Text(
+            year.toString(),
+            style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
+          ),
+        ),
+      );
+    }
+
+    return items;
   }
 
   @override

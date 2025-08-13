@@ -263,7 +263,7 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-glass dark:bg-glass-dark backdrop-blur-md border-none shadow-2xl">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-gradient-blue-purple">
             {announcement ? "Edit Announcement" : "Create New Announcement"}
@@ -276,7 +276,7 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-glass dark:bg-glass-dark rounded-lg p-1 mb-2">
+              <TabsList className="grid w-full grid-cols-4 bg-gray-100 dark:bg-slate-800 rounded-lg p-1 mb-2">
                 <TabsTrigger value="basic" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg font-semibold rounded-md transition-all">Basic Info</TabsTrigger>
                 <TabsTrigger value="content" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg font-semibold rounded-md transition-all">Content</TabsTrigger>
                 <TabsTrigger value="settings" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg font-semibold rounded-md transition-all">Settings</TabsTrigger>
@@ -285,7 +285,7 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
 
               {/* Basic Information Tab */}
               <TabsContent value="basic" className="space-y-4">
-                <Card className="bg-glass dark:bg-glass-dark border-none shadow-xl rounded-2xl">
+                <Card className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-xl rounded-2xl">
                   <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-t-2xl p-4">
                     <CardTitle className="flex items-center gap-2 text-white text-lg font-bold">
                       <Megaphone className="h-5 w-5 text-white/90" />
@@ -300,7 +300,7 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
                         <FormItem>
                           <FormLabel className="font-semibold">Title *</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter announcement title..." {...field} className="bg-glass dark:bg-glass-dark border border-blue-400/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base" />
+                            <Input placeholder="Enter announcement title..." {...field} className="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -314,11 +314,11 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
                           <FormLabel className="font-semibold">Category *</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value || undefined}>
                             <FormControl>
-                              <SelectTrigger className="bg-glass dark:bg-glass-dark border border-blue-400/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base">
+                              <SelectTrigger className="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base">
                                 <SelectValue placeholder="Select category" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="bg-glass dark:bg-glass-dark">
+                            <SelectContent className="bg-white dark:bg-slate-700">
                               {categoryOptions.map((option) => (
                                 <SelectItem key={option.value} value={option.value} className="hover:bg-blue-100/30 dark:hover:bg-blue-900/30">
                                   <div className="flex items-center gap-2">
@@ -341,11 +341,11 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
                           <FormLabel className="font-semibold">Priority</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value || undefined}>
                             <FormControl>
-                              <SelectTrigger className="bg-glass dark:bg-glass-dark border border-blue-400/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base">
+                              <SelectTrigger className="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base">
                                 <SelectValue placeholder="Select priority" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="bg-glass dark:bg-glass-dark">
+                            <SelectContent className="bg-white dark:bg-slate-700">
                               {priorityOptions.map((option) => (
                                 <SelectItem key={option.value} value={option.value} className="hover:bg-blue-100/30 dark:hover:bg-blue-900/30">
                                   <Badge className="bg-blue-500/10 text-blue-700 dark:bg-blue-700/20 dark:text-blue-200 font-semibold px-2 py-1 rounded-md" variant="secondary">
@@ -365,7 +365,7 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
 
               {/* Content Tab */}
               <TabsContent value="content" className="space-y-4">
-                <Card className="bg-glass dark:bg-glass-dark border-none shadow-xl rounded-2xl">
+                <Card className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-xl rounded-2xl">
                   <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-t-2xl p-4">
                     <CardTitle className="flex items-center gap-2 text-white text-lg font-bold">
                       <FileText className="h-5 w-5 text-white/90" />
@@ -382,7 +382,7 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
                           <FormControl>
                             <Textarea
                               placeholder="Write your announcement content here..."
-                              className="min-h-[200px] bg-glass dark:bg-glass-dark border border-blue-400/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base"
+                              className="min-h-[200px] bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base"
                               {...field}
                             />
                           </FormControl>
@@ -399,7 +399,7 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
 
               {/* Settings Tab */}
               <TabsContent value="settings" className="space-y-4">
-                <Card className="bg-glass dark:bg-glass-dark border-none shadow-xl rounded-2xl">
+                <Card className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-xl rounded-2xl">
                   <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-t-2xl p-4">
                     <CardTitle className="flex items-center gap-2 text-white text-lg font-bold">
                       <Settings className="h-5 w-5 text-white/90" />
@@ -415,11 +415,11 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
                           <FormLabel className="font-semibold">Status</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value || undefined}>
                             <FormControl>
-                              <SelectTrigger className="bg-glass dark:bg-glass-dark border border-blue-400/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base">
+                              <SelectTrigger className="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base">
                                 <SelectValue placeholder="Select status" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="bg-glass dark:bg-glass-dark">
+                              </FormControl>
+                            </SelectTrigger>
+                            <SelectContent className="bg-white dark:bg-slate-700">
                               {statusOptions.map((option) => (
                                 <SelectItem key={option.value} value={option.value} className="hover:bg-blue-100/30 dark:hover:bg-blue-900/30">
                                   {option.label}
@@ -438,7 +438,7 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
                         <FormItem>
                           <FormLabel className="font-semibold">Publish Date</FormLabel>
                           <FormControl>
-                            <Input type="datetime-local" {...field} className="bg-glass dark:bg-glass-dark border border-blue-400/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base" />
+                            <Input type="datetime-local" {...field} className="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base" />
                           </FormControl>
                           <FormDescription>
                             Leave empty to publish immediately
@@ -454,7 +454,7 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
                         <FormItem>
                           <FormLabel className="font-semibold">Expiry Date</FormLabel>
                           <FormControl>
-                            <Input type="datetime-local" {...field} className="bg-glass dark:bg-glass-dark border border-blue-400/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base" />
+                            <Input type="datetime-local" {...field} className="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base" />
                           </FormControl>
                           <FormDescription>
                             Optional: Set when this announcement should expire
@@ -493,7 +493,7 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
 
               {/* Targeting Tab */}
               <TabsContent value="targeting" className="space-y-4">
-                <Card className="bg-glass dark:bg-glass-dark border-none shadow-xl rounded-2xl">
+                <Card className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-xl rounded-2xl">
                   <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-t-2xl p-4">
                     <CardTitle className="flex items-center gap-2 text-white text-lg font-bold">
                       <Target className="h-5 w-5 text-white/90" />
@@ -536,7 +536,7 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
                               type="number"
                               min="1900"
                               max={new Date().getFullYear() + 10}
-                              className="bg-glass dark:bg-glass-dark border border-blue-400/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base"
+                              className="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base"
                             />
                             <Button type="button" onClick={addGraduationYear} size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md hover:scale-105 transition-transform">
                               <Plus className="h-4 w-4" />
@@ -562,7 +562,7 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
                               placeholder="e.g., New York"
                               value={currentLocation}
                               onChange={(e) => setCurrentLocation(e.target.value)}
-                              className="bg-glass dark:bg-glass-dark border border-blue-400/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base"
+                              className="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base"
                             />
                             <Button type="button" onClick={addLocation} size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md hover:scale-105 transition-transform">
                               <Plus className="h-4 w-4" />
@@ -588,7 +588,7 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
                               placeholder="e.g., alumni"
                               value={currentRole}
                               onChange={(e) => setCurrentRole(e.target.value)}
-                              className="bg-glass dark:bg-glass-dark border border-blue-400/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base"
+                              className="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-400/60 rounded-lg text-base"
                             />
                             <Button type="button" onClick={addRole} size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md hover:scale-105 transition-transform">
                               <Plus className="h-4 w-4" />
@@ -632,7 +632,7 @@ export function AnnouncementForm({ announcement, isOpen, onClose, onSubmit, isLo
               </div>
             )}
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose} className="rounded-lg border-blue-400/30 text-blue-700 dark:text-blue-200 bg-glass dark:bg-glass-dark hover:bg-blue-100/30 dark:hover:bg-blue-900/30">
+              <Button type="button" variant="outline" onClick={onClose} className="rounded-lg border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600">
                 Cancel
               </Button>
               <Button 

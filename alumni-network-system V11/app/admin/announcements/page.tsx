@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -88,6 +89,8 @@ import {
 } from "@/lib/api/announcementsApi"
 
 function AnnouncementManagementContent() {
+  const searchParams = useSearchParams()
+  
   // State management
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(20)
@@ -165,6 +168,20 @@ function AnnouncementManagementContent() {
   useEffect(() => {
     setCurrentPage(1)
   }, [searchTerm, categoryFilter, statusFilter, priorityFilter])
+
+  // Auto-open create form when create query parameter is present
+  useEffect(() => {
+    const createParam = searchParams.get('create')
+    console.log('Checking create param:', createParam)
+    if (createParam === '1') {
+      console.log('Opening announcement form modal')
+      setIsAnnouncementFormOpen(true)
+      // Clean up the URL by removing the query parameter
+      const url = new URL(window.location.href)
+      url.searchParams.delete('create')
+      window.history.replaceState({}, '', url.toString())
+    }
+  }, [searchParams])
 
   // Show error state for network connectivity issues only
   if (hasErrors && isNetworkError) {
@@ -611,7 +628,7 @@ function AnnouncementManagementContent() {
                       <SelectItem value="low">Low</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={sortBy} onValueChange={setSortBy}>
+                                     <Select value={sortBy} onValueChange={(value: 'createdAt' | 'publishDate' | 'views' | 'likes' | 'comments' | 'title') => setSortBy(value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
@@ -643,7 +660,7 @@ function AnnouncementManagementContent() {
                       {selectedAnnouncements.length} announcement(s) selected
                     </span>
                     <div className="flex items-center space-x-2">
-                      <Select value={bulkAction} onValueChange={setBulkAction}>
+                                             <Select value={bulkAction} onValueChange={(value: 'publish' | 'archive' | 'delete' | 'pin' | 'unpin' | "") => setBulkAction(value)}>
                         <SelectTrigger className="w-40">
                           <SelectValue placeholder="Bulk action" />
                         </SelectTrigger>
