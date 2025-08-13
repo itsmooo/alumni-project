@@ -18,6 +18,9 @@ class ApiService {
 
     return {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Cache-Control': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
       if (token != null) 'Authorization': 'Bearer $token',
     };
   }
@@ -54,15 +57,14 @@ class ApiService {
 
   // Login endpoint
   static Future<Map<String, dynamic>> login(
-      String identifier, String password) async {
+    String identifier,
+    String password,
+  ) async {
     try {
       final response = await http.post(
         Uri.parse(ApiConfig.getUrl(ApiConfig.authLogin)),
         headers: await _getHeaders(),
-        body: jsonEncode({
-          'identifier': identifier,
-          'password': password,
-        }),
+        body: jsonEncode({'identifier': identifier, 'password': password}),
       );
 
       final data = jsonDecode(response.body);
@@ -95,20 +97,38 @@ class ApiService {
     String? major,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse(ApiConfig.getUrl(ApiConfig.authRegister)),
-        headers: await _getHeaders(),
-        body: jsonEncode({
-          'firstName': firstName,
-          'lastName': lastName,
-          'email': email,
-          'phone': phone,
-          'password': password,
-          'graduationYear': graduationYear,
-          if (degree != null) 'degree': degree,
-          if (major != null) 'major': major,
-        }),
-      );
+      final url = ApiConfig.getUrl(ApiConfig.authRegister);
+      final headers = await _getHeaders();
+      final body = jsonEncode({
+        'firstName': firstName,
+        'lastName': lastName,
+        'email': email,
+        'phone': phone,
+        'password': password,
+        'graduationYear': graduationYear,
+        if (degree != null) 'degree': degree,
+        if (major != null) 'major': major,
+      });
+
+      print('🚀 Registration Request:');
+      print('URL: $url');
+      print('Headers: $headers');
+      print('Body: $body');
+
+      final response = await http
+          .post(Uri.parse(url), headers: headers, body: body)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw Exception(
+                'Request timeout - please check your internet connection',
+              );
+            },
+          );
+
+      print('📡 Response Status: ${response.statusCode}');
+      print('📡 Response Headers: ${response.headers}');
+      print('📡 Response Body: ${response.body}');
 
       final data = jsonDecode(response.body);
 
@@ -118,9 +138,11 @@ class ApiService {
         await saveUser(data['user']);
         return data;
       } else {
+        print('❌ Registration failed with status: ${response.statusCode}');
         throw Exception(data['message'] ?? 'Registration failed');
       }
     } catch (e) {
+      print('💥 Registration error: $e');
       if (e is Exception) {
         rethrow;
       }
@@ -180,22 +202,20 @@ class ApiService {
       if (priority != null) queryParams['priority'] = priority;
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
 
-      final uri = Uri.parse(ApiConfig.getUrl(ApiConfig.announcements))
-          .replace(queryParameters: queryParams);
+      final uri = Uri.parse(
+        ApiConfig.getUrl(ApiConfig.announcements),
+      ).replace(queryParameters: queryParams);
 
       final headers = await _getHeaders();
 
       final response = await http
-          .get(
-        uri,
-        headers: headers,
-      )
+          .get(uri, headers: headers)
           .timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          throw Exception('Request timeout - check if backend is running');
-        },
-      );
+            const Duration(seconds: 10),
+            onTimeout: () {
+              throw Exception('Request timeout - check if backend is running');
+            },
+          );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -211,8 +231,10 @@ class ApiService {
       } else {
         final data = jsonDecode(response.body);
         print('API error: ${data['message']}');
-        throw Exception(data['message'] ??
-            'Failed to fetch announcements (Status: ${response.statusCode})');
+        throw Exception(
+          data['message'] ??
+              'Failed to fetch announcements (Status: ${response.statusCode})',
+        );
       }
     } catch (e) {
       print('API service error: $e');
@@ -271,7 +293,9 @@ class ApiService {
 
   // Add comment to announcement
   static Future<Map<String, dynamic>> addAnnouncementComment(
-      String id, String content) async {
+    String id,
+    String content,
+  ) async {
     try {
       final response = await http.post(
         Uri.parse('${ApiConfig.getUrl(ApiConfig.announcements)}/$id/comments'),
@@ -325,15 +349,15 @@ class ApiService {
 
       final response = await http
           .get(
-        Uri.parse(ApiConfig.getUrl(ApiConfig.announcements)),
-        headers: await _getHeaders(),
-      )
+            Uri.parse(ApiConfig.getUrl(ApiConfig.announcements)),
+            headers: await _getHeaders(),
+          )
           .timeout(
-        const Duration(seconds: 5),
-        onTimeout: () {
-          throw Exception('Connection timeout');
-        },
-      );
+            const Duration(seconds: 5),
+            onTimeout: () {
+              throw Exception('Connection timeout');
+            },
+          );
 
       print('Connection test status: ${response.statusCode}');
       return response.statusCode == 200 || response.statusCode == 401;
@@ -372,8 +396,9 @@ class ApiService {
       if (remote != null) queryParams['remote'] = remote.toString();
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
 
-      final uri =
-          Uri.parse('$baseUrl/jobs').replace(queryParameters: queryParams);
+      final uri = Uri.parse(
+        '$baseUrl/jobs',
+      ).replace(queryParameters: queryParams);
 
       print('=== JOBS API DEBUG ===');
       print('Requesting URL: $uri');
@@ -382,10 +407,7 @@ class ApiService {
       final headers = await _getHeaders();
       print('Headers: $headers');
 
-      final response = await http.get(
-        uri,
-        headers: headers,
-      );
+      final response = await http.get(uri, headers: headers);
 
       print('Response status code: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -478,8 +500,9 @@ class ApiService {
       if (upcoming != null) queryParams['upcoming'] = upcoming.toString();
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
 
-      final uri =
-          Uri.parse('$baseUrl/events').replace(queryParameters: queryParams);
+      final uri = Uri.parse(
+        '$baseUrl/events',
+      ).replace(queryParameters: queryParams);
 
       print('=== EVENTS API DEBUG ===');
       print('Requesting URL: $uri');
@@ -488,10 +511,7 @@ class ApiService {
       final headers = await _getHeaders();
       print('Headers: $headers');
 
-      final response = await http.get(
-        uri,
-        headers: headers,
-      );
+      final response = await http.get(uri, headers: headers);
 
       print('Response status code: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -562,7 +582,8 @@ class ApiService {
 
   // Cancel event registration
   static Future<Map<String, dynamic>> cancelEventRegistration(
-      String eventId) async {
+    String eventId,
+  ) async {
     try {
       final response = await http.delete(
         Uri.parse('$baseUrl/events/$eventId/register'),
@@ -634,7 +655,8 @@ class ApiService {
 
   // Create payment intent
   static Future<PaymentIntentResponse> createPaymentIntent(
-      PaymentRequest request) async {
+    PaymentRequest request,
+  ) async {
     try {
       print('=== PAYMENT API DEBUG ===');
       print('Creating payment intent: ${request.toJson()}');
@@ -677,16 +699,14 @@ class ApiService {
         'limit': limit.toString(),
       };
 
-      final uri = Uri.parse('$baseUrl/payments/my-payments')
-          .replace(queryParameters: queryParams);
+      final uri = Uri.parse(
+        '$baseUrl/payments/my-payments',
+      ).replace(queryParameters: queryParams);
 
       print('=== GET USER PAYMENTS DEBUG ===');
       print('Requesting URL: $uri');
 
-      final response = await http.get(
-        uri,
-        headers: await _getHeaders(),
-      );
+      final response = await http.get(uri, headers: await _getHeaders());
 
       print('Response status code: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -789,10 +809,7 @@ class ApiService {
       final response = await http.post(
         Uri.parse('$baseUrl/payments/hormuud'),
         headers: await _getHeaders(),
-        body: jsonEncode({
-          'phone': phone,
-          'amount': amount,
-        }),
+        body: jsonEncode({'phone': phone, 'amount': amount}),
       );
 
       print('Response status code: ${response.statusCode}');
@@ -805,9 +822,11 @@ class ApiService {
         return data;
       } else {
         print('Hormuud payment error: ${data['error']}');
-        throw Exception(data['error'] ??
-            data['message'] ??
-            'Failed to process Hormuud payment');
+        throw Exception(
+          data['error'] ??
+              data['message'] ??
+              'Failed to process Hormuud payment',
+        );
       }
     } catch (e) {
       print('Hormuud payment API service error: $e');
@@ -849,7 +868,8 @@ class ApiService {
 
   // Update user profile (partial update)
   static Future<User> updateUserProfile(
-      Map<String, dynamic> fieldsToUpdate) async {
+    Map<String, dynamic> fieldsToUpdate,
+  ) async {
     // If profilePicture is present, also set 'photo' for backend compatibility
     if (fieldsToUpdate.containsKey('profilePicture')) {
       fieldsToUpdate['photo'] = fieldsToUpdate['profilePicture'];
@@ -891,7 +911,8 @@ class ApiService {
         return false;
       } else {
         throw Exception(
-            data['message'] ?? 'Failed to check application status');
+          data['message'] ?? 'Failed to check application status',
+        );
       }
     } catch (e) {
       if (e is Exception) {
@@ -954,7 +975,8 @@ class ApiService {
       final appliedJobIds = await getUserAppliedJobIds();
       print('✅ getUserAppliedJobIds test successful!');
       print(
-          'User has applied for ${appliedJobIds.length} jobs: $appliedJobIds');
+        'User has applied for ${appliedJobIds.length} jobs: $appliedJobIds',
+      );
     } catch (e) {
       print('❌ getUserAppliedJobIds test failed: $e');
     }

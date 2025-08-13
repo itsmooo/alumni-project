@@ -397,7 +397,7 @@ router.post(
     body("firstName").trim().notEmpty().withMessage("First name is required"),
     body("lastName").trim().notEmpty().withMessage("Last name is required"),
     body("email").isEmail().withMessage("Valid email is required"),
-    body("phone").isMobilePhone().withMessage("Valid phone number is required"),
+    body("phone").trim().notEmpty().withMessage("Phone number is required"),
     body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
     body("graduationYear")
       .isInt({ min: 1950, max: new Date().getFullYear() + 10 })
@@ -445,17 +445,22 @@ router.post(
 
       await user.save()
 
-      // Send verification email
-      await sendEmail({
-        to: email,
-        subject: "Verify Your Alumni Network Account",
-        html: `
-        <h2>Welcome to Alumni Network!</h2>
-        <p>Please verify your email by clicking the link below:</p>
-        <a href="http://localhost:5000/api/auth/verify-email?token=${emailToken}">Verify Email</a>
-        <p>This link expires in 24 hours.</p>
-      `,
-      })
+      // Send verification email (optional - don't fail registration if email fails)
+      try {
+        await sendEmail({
+          to: email,
+          subject: "Verify Your Alumni Network Account",
+          html: `
+          <h2>Welcome to Alumni Network!</h2>
+          <p>Please verify your email by clicking the link below:</p>
+          <a href="http://localhost:5000/api/auth/verify-email?token=${emailToken}">Verify Email</a>
+          <p>This link expires in 24 hours.</p>
+        `,
+        })
+      } catch (emailError) {
+        console.error("Email sending failed (non-critical):", emailError)
+        // Continue with registration even if email fails
+      }
 
       // Generate JWT token
       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" })
@@ -467,7 +472,32 @@ router.post(
       })
     } catch (error) {
       console.error("Registration error:", error)
-      res.status(500).json({ message: "Server error during registration" })
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      })
+      
+      // Provide more specific error messages
+      if (error.name === 'ValidationError') {
+        const validationErrors = Object.values(error.errors).map(err => err.message)
+        return res.status(400).json({ 
+          message: "Validation error", 
+          errors: validationErrors 
+        })
+      }
+      
+      if (error.code === 11000) {
+        const duplicateField = Object.keys(error.keyPattern)[0]
+        return res.status(400).json({ 
+          message: `User already exists with this ${duplicateField}` 
+        })
+      }
+      
+      res.status(500).json({ 
+        message: "Server error during registration",
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      })
     }
   },
 )

@@ -64,14 +64,39 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS configuration
+// CORS configuration - Enhanced for Flutter/Mobile apps
 app.use(
-  cors()
-  //   {
-  //   origin: process.env.FRONTEND_URL || "http://localhost:3000",
-  //   credentials: true,
-  // }
+  cors({
+    origin: true, // Allow all origins for development/mobile apps
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: [
+      'Origin',
+      'X-Requested-With',
+      'Content-Type',
+      'Accept',
+      'Authorization',
+      'Cache-Control',
+      'Pragma',
+      'Expires',
+      'X-HTTP-Method-Override',
+      'Access-Control-Allow-Origin',
+      'Access-Control-Allow-Methods',
+      'Access-Control-Allow-Headers'
+    ],
+    exposedHeaders: ['Authorization'],
+    optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
+  })
 );
+
+// Handle preflight requests explicitly
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma, Expires');
+  res.header('Access-Control-Max-Age', '3600');
+  res.sendStatus(200);
+});
 
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
