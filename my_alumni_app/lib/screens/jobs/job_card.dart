@@ -26,10 +26,7 @@ class JobCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: job.featured
-                ? Border.all(
-                    color: Theme.of(context).primaryColor,
-                    width: 2,
-                  )
+                ? Border.all(color: Theme.of(context).primaryColor, width: 2)
                 : null,
           ),
           child: Padding(
@@ -41,11 +38,7 @@ class JobCard extends StatelessWidget {
                 Row(
                   children: [
                     if (job.featured)
-                      Icon(
-                        Icons.star,
-                        color: Colors.amber,
-                        size: 20,
-                      ),
+                      Icon(Icons.star, color: Colors.amber, size: 20),
                     if (job.featured) const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -140,8 +133,9 @@ class JobCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: _getExperienceColor(job.experienceLevel)
-                            .withOpacity(0.1),
+                        color: _getExperienceColor(
+                          job.experienceLevel,
+                        ).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -170,10 +164,7 @@ class JobCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         job.locationDisplay,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ),
                   ],
@@ -184,19 +175,12 @@ class JobCard extends StatelessWidget {
                 // Salary
                 Row(
                   children: [
-                    Icon(
-                      Icons.attach_money,
-                      size: 16,
-                      color: Colors.grey[600],
-                    ),
+                    Icon(Icons.attach_money, size: 16, color: Colors.grey[600]),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         job.salaryDisplay,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ),
                   ],
@@ -224,11 +208,7 @@ class JobCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        Icon(
-                          Icons.people,
-                          size: 16,
-                          color: Colors.grey[600],
-                        ),
+                        Icon(Icons.people, size: 16, color: Colors.grey[600]),
                         const SizedBox(width: 4),
                         Text(
                           '${job.applicationCount}',
@@ -245,10 +225,7 @@ class JobCard extends StatelessWidget {
                     // Date
                     Text(
                       _formatDate(job.createdAt),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[500],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                     ),
                   ],
                 ),
@@ -303,7 +280,8 @@ class JobCard extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                          hasApplied ? 'View Application' : 'View Details'),
+                        hasApplied ? 'View Application' : 'View Details',
+                      ),
                     ),
                   ],
                 ),
@@ -351,6 +329,24 @@ class JobCard extends StatelessWidget {
     final now = DateTime.now();
     final difference = now.difference(date);
 
+    // Handle future dates
+    if (difference.isNegative) {
+      final absDifference = difference.abs();
+      if (absDifference.inDays == 0) {
+        if (absDifference.inHours == 0) {
+          return 'in ${absDifference.inMinutes}m';
+        }
+        return 'in ${absDifference.inHours}h';
+      } else if (absDifference.inDays == 1) {
+        return 'Tomorrow';
+      } else if (absDifference.inDays < 7) {
+        return 'in ${absDifference.inDays}d';
+      } else {
+        return DateFormat('MMM dd, yyyy').format(date);
+      }
+    }
+
+    // Handle past dates
     if (difference.inDays == 0) {
       if (difference.inHours == 0) {
         return '${difference.inMinutes}m ago';

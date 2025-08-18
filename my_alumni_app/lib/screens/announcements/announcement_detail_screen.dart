@@ -710,6 +710,24 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
     final now = DateTime.now();
     final difference = now.difference(date);
 
+    // Handle future dates
+    if (difference.isNegative) {
+      final absDifference = difference.abs();
+      if (absDifference.inDays == 0) {
+        if (absDifference.inHours == 0) {
+          return 'in ${absDifference.inMinutes}m';
+        }
+        return 'in ${absDifference.inHours}h';
+      } else if (absDifference.inDays == 1) {
+        return 'Tomorrow';
+      } else if (absDifference.inDays < 7) {
+        return 'in ${absDifference.inDays}d';
+      } else {
+        return DateFormat('MMM dd, yyyy').format(date);
+      }
+    }
+
+    // Handle past dates
     if (difference.inDays == 0) {
       if (difference.inHours == 0) {
         return '${difference.inMinutes}m ago';

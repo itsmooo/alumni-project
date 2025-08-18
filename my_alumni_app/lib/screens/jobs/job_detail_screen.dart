@@ -10,10 +10,7 @@ import '../../services/api_service.dart';
 class JobDetailScreen extends StatefulWidget {
   final Job job;
 
-  const JobDetailScreen({
-    super.key,
-    required this.job,
-  });
+  const JobDetailScreen({super.key, required this.job});
 
   @override
   State<JobDetailScreen> createState() => _JobDetailScreenState();
@@ -100,7 +97,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             _hasApplied = newStatus;
           });
           print(
-              'Background update completed for job ${widget.job.id}: $newStatus');
+            'Background update completed for job ${widget.job.id}: $newStatus',
+          );
         }
       }
     } catch (e) {
@@ -131,7 +129,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       // Keep the cached status if API fails, but log the error
       if (e.toString().contains('Already applied')) {
         print(
-            'API indicates user has already applied, updating local state...');
+          'API indicates user has already applied, updating local state...',
+        );
         setState(() {
           _hasApplied = true;
         });
@@ -175,7 +174,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                'Status refreshed: ${newStatus ? "Applied" : "Not Applied"}'),
+              'Status refreshed: ${newStatus ? "Applied" : "Not Applied"}',
+            ),
             backgroundColor: newStatus ? Colors.green : Colors.blue,
           ),
         );
@@ -215,10 +215,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             onPressed: _retryCheckApplicationStatus,
             tooltip: 'Refresh application status',
           ),
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: _shareJob,
-          ),
+          IconButton(icon: const Icon(Icons.share), onPressed: _shareJob),
         ],
       ),
       body: SingleChildScrollView(
@@ -278,11 +275,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             Row(
               children: [
                 if (widget.job.featured)
-                  Icon(
-                    Icons.star,
-                    color: Colors.amber,
-                    size: 24,
-                  ),
+                  Icon(Icons.star, color: Colors.amber, size: 24),
                 if (widget.job.featured) const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -312,8 +305,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             Row(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: _getTypeColor(widget.job.type).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
@@ -329,11 +324,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 ),
                 const SizedBox(width: 12),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
-                    color: _getExperienceColor(widget.job.experienceLevel)
-                        .withOpacity(0.1),
+                    color: _getExperienceColor(
+                      widget.job.experienceLevel,
+                    ).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
@@ -363,27 +361,18 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           children: [
             const Text(
               'Company',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
               widget.job.company.name,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             if (widget.job.company.description != null) ...[
               const SizedBox(height: 8),
               Text(
                 widget.job.company.description!,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
             if (widget.job.company.website != null) ...[
@@ -418,20 +407,26 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           children: [
             const Text(
               'Job Details',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _buildDetailRow(
-                Icons.location_on, 'Location', widget.job.locationDisplay),
+              Icons.location_on,
+              'Location',
+              widget.job.locationDisplay,
+            ),
             const SizedBox(height: 12),
             _buildDetailRow(
-                Icons.attach_money, 'Salary', widget.job.salaryDisplay),
+              Icons.attach_money,
+              'Salary',
+              widget.job.salaryDisplay,
+            ),
             const SizedBox(height: 12),
             _buildDetailRow(
-                Icons.category, 'Category', widget.job.categoryDisplayName),
+              Icons.category,
+              'Category',
+              widget.job.categoryDisplayName,
+            ),
             if (widget.job.expiresAt != null) ...[
               const SizedBox(height: 12),
               _buildDetailRow(
@@ -462,18 +457,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           children: [
             const Text(
               'Description',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
               widget.job.description,
-              style: const TextStyle(
-                fontSize: 16,
-                height: 1.6,
-              ),
+              style: const TextStyle(fontSize: 16, height: 1.6),
             ),
           ],
         ),
@@ -491,32 +480,31 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           children: [
             const Text(
               'Requirements',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            ...widget.job.requirements.map((requirement) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.check_circle,
-                        size: 16,
-                        color: Colors.green,
+            ...widget.job.requirements.map(
+              (requirement) => Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.check_circle,
+                      size: 16,
+                      color: Colors.green,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        requirement,
+                        style: const TextStyle(fontSize: 14),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          requirement,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -533,32 +521,27 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           children: [
             const Text(
               'Benefits',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            ...widget.job.benefits.map((benefit) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.favorite,
-                        size: 16,
-                        color: Colors.red,
+            ...widget.job.benefits.map(
+              (benefit) => Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.favorite, size: 16, color: Colors.red),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        benefit,
+                        style: const TextStyle(fontSize: 14),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          benefit,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -573,11 +556,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildStatItem(
-              Icons.visibility,
-              '${widget.job.views}',
-              'Views',
-            ),
+            _buildStatItem(Icons.visibility, '${widget.job.views}', 'Views'),
             _buildStatItem(
               Icons.people,
               '${widget.job.applicationCount}',
@@ -606,7 +585,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 ? [Colors.grey, Colors.grey.withOpacity(0.8)]
                 : [
                     Theme.of(context).primaryColor,
-                    Theme.of(context).primaryColor.withOpacity(0.8)
+                    Theme.of(context).primaryColor.withOpacity(0.8),
                   ],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
@@ -678,12 +657,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             color: Colors.grey[600],
           ),
         ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(fontSize: 14),
-          ),
-        ),
+        Expanded(child: Text(value, style: const TextStyle(fontSize: 14))),
       ],
     );
   }
@@ -695,18 +669,9 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
       ],
     );
   }
@@ -747,6 +712,24 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     final now = DateTime.now();
     final difference = now.difference(date);
 
+    // Handle future dates
+    if (difference.isNegative) {
+      final absDifference = difference.abs();
+      if (absDifference.inDays == 0) {
+        if (absDifference.inHours == 0) {
+          return 'in ${absDifference.inMinutes}m';
+        }
+        return 'in ${absDifference.inHours}h';
+      } else if (absDifference.inDays == 1) {
+        return 'Tomorrow';
+      } else if (absDifference.inDays < 7) {
+        return 'in ${absDifference.inDays}d';
+      } else {
+        return DateFormat('MMM dd, yyyy').format(date);
+      }
+    }
+
+    // Handle past dates
     if (difference.inDays == 0) {
       if (difference.inHours == 0) {
         return '${difference.inMinutes}m ago';
@@ -776,9 +759,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             children: [
               Icon(Icons.info_outline, color: Colors.white, size: 20),
               const SizedBox(width: 12),
-              Expanded(
-                child: Text('You have already applied for this job'),
-              ),
+              Expanded(child: Text('You have already applied for this job')),
             ],
           ),
           backgroundColor: Colors.orange,
@@ -802,9 +783,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 _hasApplied = true;
               });
               // Update the provider as well
-              context
-                  .read<JobsProvider>()
-                  .setApplicationStatus(widget.job.id, true);
+              context.read<JobsProvider>().setApplicationStatus(
+                    widget.job.id,
+                    true,
+                  );
             },
             onAlreadyApplied: () {
               // Handle the case where the API says "Already applied" but local state doesn't know
@@ -813,9 +795,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 _hasApplied = true;
               });
               // Force sync with the provider
-              context
-                  .read<JobsProvider>()
-                  .setApplicationStatus(widget.job.id, true);
+              context.read<JobsProvider>().setApplicationStatus(
+                    widget.job.id,
+                    true,
+                  );
             },
           ),
         ),
@@ -832,12 +815,12 @@ class JobApplicationForm extends StatefulWidget {
   final Job job;
   final VoidCallback? onApplicationSuccess;
   final VoidCallback? onAlreadyApplied;
-  const JobApplicationForm(
-      {Key? key,
-      required this.job,
-      this.onApplicationSuccess,
-      this.onAlreadyApplied})
-      : super(key: key);
+  const JobApplicationForm({
+    Key? key,
+    required this.job,
+    this.onApplicationSuccess,
+    this.onAlreadyApplied,
+  }) : super(key: key);
 
   @override
   State<JobApplicationForm> createState() => _JobApplicationFormState();
@@ -889,8 +872,9 @@ class _JobApplicationFormState extends State<JobApplicationForm> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Application submitted successfully'),
-              backgroundColor: Colors.green),
+            content: Text('Application submitted successfully'),
+            backgroundColor: Colors.green,
+          ),
         );
         widget.onApplicationSuccess?.call();
         Navigator.pop(context);
@@ -899,7 +883,9 @@ class _JobApplicationFormState extends State<JobApplicationForm> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Already applied'), backgroundColor: Colors.orange),
+            content: Text('Already applied'),
+            backgroundColor: Colors.orange,
+          ),
         );
         widget.onAlreadyApplied?.call();
       } else {
@@ -926,8 +912,10 @@ class _JobApplicationFormState extends State<JobApplicationForm> {
           child: ListView(
             children: [
               for (int i = 0; i < widget.job.questionnaire.length; i++) ...[
-                Text(widget.job.questionnaire[i],
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  widget.job.questionnaire[i],
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _controllers[i],
