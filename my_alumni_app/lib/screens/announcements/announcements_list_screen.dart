@@ -366,6 +366,19 @@ class _AnnouncementsListScreenState extends State<AnnouncementsListScreen> {
                               icon: Icon(Icons.wifi),
                               label: Text('Test Connection'),
                             ),
+                            const SizedBox(width: 12),
+                            TextButton.icon(
+                              onPressed: _testApiConnection,
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.secondary,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
+                              ),
+                              icon: Icon(Icons.api),
+                              label: Text('Test API'),
+                            ),
                           ],
                         ),
                       ],
@@ -490,6 +503,50 @@ class _AnnouncementsListScreenState extends State<AnnouncementsListScreen> {
                 Icon(Icons.error_outline, color: Colors.white, size: 20),
                 const SizedBox(width: 12),
                 Expanded(child: Text('Connection failed: ${e.toString()}')),
+              ],
+            ),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  void _testApiConnection() async {
+    try {
+      final isConnected = await ApiService.testApiConnection();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white, size: 20),
+                const SizedBox(width: 12),
+                const Text('API Connection successful'),
+              ],
+            ),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 12),
+                Expanded(child: Text('API Connection failed: ${e.toString()}')),
               ],
             ),
             backgroundColor: AppColors.error,

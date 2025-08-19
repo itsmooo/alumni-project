@@ -729,13 +729,15 @@ router.get(
       const skip = (page - 1) * limit
 
       const filter = {
-        $or: [
-          { status: "published" },
-          { 
-            status: "draft", 
-            publishDate: { $lte: new Date() }
-          }
-        ]
+        // For development: show all announcements regardless of status
+        // Remove status filter to see all announcements
+        // $or: [
+        //   { status: "published" },
+        //   { 
+        //     status: "draft", 
+        //     publishDate: { $lte: new Date() }
+        //   }
+        // ]
       }
 
       // Add filters
@@ -751,16 +753,15 @@ router.get(
         filter.$text = { $search: req.query.search }
       }
 
-      // Filter by expiry date (only show non-expired announcements)
-      // Comment out this section if you want to show expired announcements
-      filter.$and = [
-        {
-          $or: [
-            { expiryDate: { $exists: false } },
-            { expiryDate: { $gte: new Date() } }
-          ]
-        }
-      ]
+      // Comment out expiry date filter for development
+      // filter.$and = [
+      //   {
+      //     $or: [
+      //       { expiryDate: { $exists: false } },
+      //       { expiryDate: { $gte: new Date() } }
+      //     ]
+      //   }
+      // ]
 
       const announcements = await Announcement.find(filter)
         .populate("author", "firstName lastName")

@@ -115,16 +115,15 @@ class ApiService {
       print('Headers: $headers');
       print('Body: $body');
 
-      final response = await http
-          .post(Uri.parse(url), headers: headers, body: body)
-          .timeout(
-            const Duration(seconds: 30),
-            onTimeout: () {
-              throw Exception(
-                'Request timeout - please check your internet connection',
-              );
-            },
+      final response =
+          await http.post(Uri.parse(url), headers: headers, body: body).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw Exception(
+            'Request timeout - please check your internet connection',
           );
+        },
+      );
 
       print('📡 Response Status: ${response.statusCode}');
       print('📡 Response Headers: ${response.headers}');
@@ -180,6 +179,51 @@ class ApiService {
     await clearAuthData();
   }
 
+  // Test API connection
+  static Future<bool> testApiConnection() async {
+    try {
+      print('🧪 Testing API Connection...');
+      print('Base URL: $baseUrl');
+
+      final url = '$baseUrl/announcements';
+      print('Full URL: $url');
+
+      final response = await http
+          .get(
+            Uri.parse(url),
+            headers: await _getHeaders(),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      print('Response Status: ${response.statusCode}');
+      print('Response Headers: ${response.headers}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print('✅ Success! Response data:');
+        print('Announcements count: ${data['announcements']?.length ?? 0}');
+        print('Pagination: ${data['pagination']}');
+
+        if (data['announcements'] != null && data['announcements'].isNotEmpty) {
+          print('First announcement: ${data['announcements'][0]['title']}');
+          print(
+              'First announcement status: ${data['announcements'][0]['status']}');
+        }
+        return true;
+      } else {
+        print('❌ Error: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('❌ Exception: $e');
+      if (e.toString().contains('Connection refused')) {
+        print('💡 Make sure your backend server is running on localhost:5000');
+      }
+      return false;
+    }
+  }
+
   // =============================================================================
   // ANNOUNCEMENTS API
   // =============================================================================
@@ -208,14 +252,12 @@ class ApiService {
 
       final headers = await _getHeaders();
 
-      final response = await http
-          .get(uri, headers: headers)
-          .timeout(
-            const Duration(seconds: 10),
-            onTimeout: () {
-              throw Exception('Request timeout - check if backend is running');
-            },
-          );
+      final response = await http.get(uri, headers: headers).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Request timeout - check if backend is running');
+        },
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -349,15 +391,15 @@ class ApiService {
 
       final response = await http
           .get(
-            Uri.parse(ApiConfig.getUrl(ApiConfig.announcements)),
-            headers: await _getHeaders(),
-          )
+        Uri.parse(ApiConfig.getUrl(ApiConfig.announcements)),
+        headers: await _getHeaders(),
+      )
           .timeout(
-            const Duration(seconds: 5),
-            onTimeout: () {
-              throw Exception('Connection timeout');
-            },
-          );
+        const Duration(seconds: 5),
+        onTimeout: () {
+          throw Exception('Connection timeout');
+        },
+      );
 
       print('Connection test status: ${response.statusCode}');
       return response.statusCode == 200 || response.statusCode == 401;
