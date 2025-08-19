@@ -709,38 +709,24 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   String _formatDate(DateTime date) {
+    // Show exact posting date and time
     final now = DateTime.now();
-    final difference = now.difference(date);
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final dateOnly = DateTime(date.year, date.month, date.day);
 
-    // Handle future dates
-    if (difference.isNegative) {
-      final absDifference = difference.abs();
-      if (absDifference.inDays == 0) {
-        if (absDifference.inHours == 0) {
-          return 'in ${absDifference.inMinutes}m';
-        }
-        return 'in ${absDifference.inHours}h';
-      } else if (absDifference.inDays == 1) {
-        return 'Tomorrow';
-      } else if (absDifference.inDays < 7) {
-        return 'in ${absDifference.inDays}d';
-      } else {
-        return DateFormat('MMM dd, yyyy').format(date);
-      }
-    }
+    // Format time as "2:30 PM"
+    final timeFormat = DateFormat('h:mm a');
+    final timeString = timeFormat.format(date);
 
-    // Handle past dates
-    if (difference.inDays == 0) {
-      if (difference.inHours == 0) {
-        return '${difference.inMinutes}m ago';
-      }
-      return '${difference.inHours}h ago';
-    } else if (difference.inDays == 1) {
-      return 'Yesterday';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
+    if (dateOnly == today) {
+      return 'Today at $timeString';
+    } else if (dateOnly == yesterday) {
+      return 'Yesterday at $timeString';
     } else {
-      return DateFormat('MMM dd, yyyy').format(date);
+      // Show full date with time for older posts
+      final dateFormat = DateFormat('MMM dd, yyyy');
+      return '${dateFormat.format(date)} at $timeString';
     }
   }
 

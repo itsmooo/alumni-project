@@ -356,7 +356,11 @@ router.post("/admin/bulk",
 
       switch (action) {
         case "publish":
-          updateData = { status: "published", publishDate: new Date() }
+          // Set unique publish date for each announcement
+          updateData = { 
+            status: "published", 
+            publishDate: new Date() 
+          }
           break
         case "archive":
           updateData = { status: "archived" }
@@ -431,10 +435,15 @@ router.post(
         author: req.user._id,
       })
 
-      // Set publish date if not provided and status is published
-      if (!announcement.publishDate && announcement.status === "published") {
+      // Only set publishDate if explicitly provided or if status is published
+      // Don't auto-set it to allow createdAt to show the actual creation time
+      if (req.body.publishDate) {
+        announcement.publishDate = req.body.publishDate
+      } else if (announcement.status === "published" && req.body.publishDate === undefined) {
+        // Only set publishDate if status is published AND no publishDate was provided
         announcement.publishDate = new Date()
       }
+      // If no publishDate is set, createdAt will be used automatically by Mongoose timestamps
 
       await announcement.save()
 
@@ -967,10 +976,12 @@ router.post(
         author: req.user._id,
       })
 
-      // Set publish date if not provided
-      if (!announcement.publishDate) {
-        announcement.publishDate = new Date()
+      // Only set publish date if explicitly provided
+      // Don't auto-set it to allow createdAt to show the actual creation time
+      if (req.body.publishDate) {
+        announcement.publishDate = req.body.publishDate
       }
+      // If no publishDate is set, createdAt will be used automatically by Mongoose timestamps
 
       await announcement.save()
 
